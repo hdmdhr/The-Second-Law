@@ -8,7 +8,7 @@ namespace SecondLaw
         public static CharacterStats CreateUniformValkyrieStats()
         {
             CharacterStats stats = ScriptableObject.CreateInstance<CharacterStats>();
-            stats.displayName = "Uniform Valkyrie";
+            stats.displayName = "制服战姬";
             stats.maxHealth = 135;
             stats.maxStamina = 100;
             stats.maxAmmo = 6;
@@ -24,7 +24,7 @@ namespace SecondLaw
         public static CharacterStats CreateSlimeStats()
         {
             CharacterStats stats = ScriptableObject.CreateInstance<CharacterStats>();
-            stats.displayName = "Slime";
+            stats.displayName = "史莱姆";
             stats.maxHealth = 38;
             stats.maxStamina = 0;
             stats.maxAmmo = 0;
@@ -38,9 +38,9 @@ namespace SecondLaw
         {
             QuestDefinition quest = ScriptableObject.CreateInstance<QuestDefinition>();
             quest.questId = "f_rank_slime_cleanup";
-            quest.title = "F-Rank Request: Slime Cleanup";
-            quest.clientName = "Mina, Guild Receptionist";
-            quest.description = "Three slimes are blocking the herb road. Clear them out, then return to the guild counter for your reward.";
+            quest.title = LocalizationService.T("quest.slime.title");
+            quest.clientName = LocalizationService.T("quest.slime.client");
+            quest.description = LocalizationService.T("quest.slime.description");
             quest.targetMonsterId = "slime";
             quest.targetCount = 3;
             quest.rewardExperience = 140;
@@ -54,29 +54,11 @@ namespace SecondLaw
         {
             LetterTemplate letter = ScriptableObject.CreateInstance<LetterTemplate>();
             letter.templateId = "slime_thanks";
-            letter.senderName = "Mina";
-            letter.body =
-                "To our newest F-rank adventurer,\n\n" +
-                "The herb road is open again. The apothecary sent a basket of mint leaves and said the town smells a little braver today.\n\n" +
-                "You came back with mud on your shoes and slime gel on your cuffs, which means you did the work properly. The guild has recorded your first successful request.";
-            letter.replyOpenings = new[]
-            {
-                "Dear Mina,",
-                "To the Adventurers' Guild,",
-                "Mina,"
-            };
-            letter.replyBodies = new[]
-            {
-                "I am glad the road is safe again. Please send my thanks to the apothecary.",
-                "The slimes were tougher than expected, but this was a good first step.",
-                "Next time, I will return with cleaner cuffs and a faster report."
-            };
-            letter.replyClosings = new[]
-            {
-                "Respectfully, your new F-rank adventurer.",
-                "I will keep doing what I can.",
-                "Yes adventure, but not too adventurous."
-            };
+            letter.senderName = LocalizationService.T("letter.slime.sender");
+            letter.body = LocalizationService.T("letter.slime.body");
+            letter.replyOpenings = LocalizationService.ReplyOpenings();
+            letter.replyBodies = LocalizationService.ReplyBodies();
+            letter.replyClosings = LocalizationService.ReplyClosings();
             letter.affectionReward = 1;
             return letter;
         }

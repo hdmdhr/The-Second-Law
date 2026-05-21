@@ -15,6 +15,7 @@ namespace SecondLaw
         private string selectedOpening;
         private string selectedBody;
         private string selectedClosing;
+        private IReadOnlyList<string> lastRewardMessages;
 
         public static GuildUiController Create(SecondLawGame game)
         {
@@ -27,6 +28,7 @@ namespace SecondLaw
 
         public void Show(IReadOnlyList<string> rewardMessages = null)
         {
+            lastRewardMessages = rewardMessages;
             canvas.gameObject.SetActive(true);
             selectedOpening = null;
             selectedBody = null;
@@ -51,26 +53,33 @@ namespace SecondLaw
             RectTransform artBand = RuntimeUi.AddPanel(canvas.transform, "Guild Illustration", new Color(0.28f, 0.18f, 0.12f, 1f));
             RuntimeUi.SetRect(artBand, new Vector2(0f, 0.57f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
 
-            Text title = RuntimeUi.AddText(canvas.transform, "Title", "Adventurers' Guild - Second Law Demo", 38, new Color(1f, 0.91f, 0.72f), TextAnchor.UpperLeft);
+            Text title = RuntimeUi.AddText(canvas.transform, "Title", LocalizationService.T("guild.title"), 38, new Color(1f, 0.91f, 0.72f), TextAnchor.UpperLeft);
             RuntimeUi.SetRect(title.rectTransform, new Vector2(0.05f, 0.83f), new Vector2(0.78f, 0.97f), Vector2.zero, Vector2.zero);
 
-            Text tagline = RuntimeUi.AddText(canvas.transform, "Tagline", "F-rank counter / local prototype / cached letter loop", 21, new Color(0.83f, 0.76f, 0.64f));
+            Text tagline = RuntimeUi.AddText(canvas.transform, "Tagline", LocalizationService.T("guild.tagline"), 21, new Color(0.83f, 0.76f, 0.64f));
             RuntimeUi.SetRect(tagline.rectTransform, new Vector2(0.05f, 0.76f), new Vector2(0.75f, 0.82f), Vector2.zero, Vector2.zero);
+
+            Button language = RuntimeUi.AddButton(canvas.transform, "Language Toggle", LocalizationService.T("language.button"), new Color(0.18f, 0.22f, 0.28f));
+            RuntimeUi.SetRect(language.GetComponent<RectTransform>(), new Vector2(0.81f, 0.88f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
+            language.onClick.AddListener(ToggleLanguage);
 
             RectTransform questPanel = RuntimeUi.AddPanel(canvas.transform, "Quest Panel", new Color(0.17f, 0.16f, 0.15f, 0.95f));
             RuntimeUi.SetRect(questPanel, new Vector2(0.05f, 0.09f), new Vector2(0.48f, 0.56f), Vector2.zero, Vector2.zero);
 
-            Text questTitle = RuntimeUi.AddText(questPanel, "Quest Title", game.CurrentQuest.title, 28, new Color(1f, 0.92f, 0.68f));
+            Text questTitle = RuntimeUi.AddText(questPanel, "Quest Title", LocalizationService.T("quest.slime.title"), 28, new Color(1f, 0.92f, 0.68f));
             RuntimeUi.SetRect(questTitle.rectTransform, new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.93f), Vector2.zero, Vector2.zero);
 
-            Text questBody = RuntimeUi.AddText(questPanel, "Quest Body", game.CurrentQuest.description + "\n\nTarget: " + game.CurrentQuest.targetCount + " slimes\nReward: " + game.CurrentQuest.rewardExperience + " EXP / " + game.CurrentQuest.rewardGold + " Gold", 22, Color.white);
+            string questBodyText = LocalizationService.T("quest.slime.description") + "\n\n" +
+                LocalizationService.T("quest.target") + ": " + game.CurrentQuest.targetCount + " " + LocalizationService.T("quest.slimes") + "\n" +
+                LocalizationService.T("quest.reward") + ": " + game.CurrentQuest.rewardExperience + " " + LocalizationService.T("reward.exp") + " / " + game.CurrentQuest.rewardGold + " " + LocalizationService.T("reward.gold");
+            Text questBody = RuntimeUi.AddText(questPanel, "Quest Body", questBodyText, 22, Color.white);
             RuntimeUi.SetRect(questBody.rectTransform, new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.73f), Vector2.zero, Vector2.zero);
 
-            Button start = RuntimeUi.AddButton(questPanel, "Start Quest", "Accept Request", new Color(0.49f, 0.22f, 0.17f));
+            Button start = RuntimeUi.AddButton(questPanel, "Start Quest", LocalizationService.T("button.accept"), new Color(0.49f, 0.22f, 0.17f));
             RuntimeUi.SetRect(start.GetComponent<RectTransform>(), new Vector2(0.05f, 0.08f), new Vector2(0.48f, 0.24f), Vector2.zero, Vector2.zero);
             start.onClick.AddListener(game.StartQuest);
 
-            Button reset = RuntimeUi.AddButton(questPanel, "Reset Progress", "Reset Demo", new Color(0.20f, 0.22f, 0.25f));
+            Button reset = RuntimeUi.AddButton(questPanel, "Reset Progress", LocalizationService.T("button.reset"), new Color(0.20f, 0.22f, 0.25f));
             RuntimeUi.SetRect(reset.GetComponent<RectTransform>(), new Vector2(0.52f, 0.08f), new Vector2(0.95f, 0.24f), Vector2.zero, Vector2.zero);
             reset.onClick.AddListener(game.ResetProgress);
 
@@ -93,8 +102,8 @@ namespace SecondLaw
         {
             ProgressionState state = game.Progression.State;
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine("Level " + state.level + "   EXP " + state.experience + "/" + game.Progression.ExperienceForNextLevel(state.level));
-            builder.AppendLine("Gold " + state.gold + "   Reputation " + state.reputation + "   Talent Points " + state.talentPoints + "   Affection " + state.affection);
+            builder.AppendLine(LocalizationService.T("status.level") + " " + state.level + "   " + LocalizationService.T("reward.exp") + " " + state.experience + "/" + game.Progression.ExperienceForNextLevel(state.level));
+            builder.AppendLine(LocalizationService.T("status.gold") + " " + state.gold + "   " + LocalizationService.T("status.reputation") + " " + state.reputation + "   " + LocalizationService.T("status.talent_points") + " " + state.talentPoints + "   " + LocalizationService.T("status.affection") + " " + state.affection);
 
             if (rewardMessages != null)
             {
@@ -112,7 +121,7 @@ namespace SecondLaw
         {
             if (!completedQuest)
             {
-                letterText.text = "Complete a request to receive a client letter.";
+                letterText.text = LocalizationService.T("letter.empty");
                 replyPanel.gameObject.SetActive(false);
                 return;
             }
@@ -130,22 +139,22 @@ namespace SecondLaw
                 Destroy(replyPanel.GetChild(i).gameObject);
             }
 
-            AddChoiceColumn("Opening", template.replyOpenings, 0, value => selectedOpening = value);
-            AddChoiceColumn("Body", template.replyBodies, 1, value => selectedBody = value);
-            AddChoiceColumn("Closing", template.replyClosings, 2, value => selectedClosing = value);
+            AddChoiceColumn(LocalizationService.T("reply.opening"), LocalizationService.ReplyOpenings(), 0, value => selectedOpening = value);
+            AddChoiceColumn(LocalizationService.T("reply.body"), LocalizationService.ReplyBodies(), 1, value => selectedBody = value);
+            AddChoiceColumn(LocalizationService.T("reply.closing"), LocalizationService.ReplyClosings(), 2, value => selectedClosing = value);
 
-            Button send = RuntimeUi.AddButton(replyPanel, "Send Reply", "Send Reply", new Color(0.42f, 0.30f, 0.14f));
+            Button send = RuntimeUi.AddButton(replyPanel, "Send Reply", LocalizationService.T("reply.send"), new Color(0.42f, 0.30f, 0.14f));
             RuntimeUi.SetRect(send.GetComponent<RectTransform>(), new Vector2(0.78f, 0.16f), new Vector2(0.97f, 0.84f), Vector2.zero, Vector2.zero);
             send.onClick.AddListener(() =>
             {
                 if (string.IsNullOrEmpty(selectedOpening) || string.IsNullOrEmpty(selectedBody) || string.IsNullOrEmpty(selectedClosing))
                 {
-                    letterText.text = "Choose one opening, body, and closing before sending.";
+                    letterText.text = LocalizationService.T("reply.need_choices");
                     return;
                 }
 
                 game.Progression.ApplyReply(template);
-                letterText.text = selectedOpening + "\n\n" + selectedBody + "\n\n" + selectedClosing + "\n\nReply sent. Affection +" + template.affectionReward;
+                letterText.text = selectedOpening + "\n\n" + selectedBody + "\n\n" + selectedClosing + "\n\n" + LocalizationService.T("reply.sent") + template.affectionReward;
                 RefreshStatus(null);
                 replyPanel.gameObject.SetActive(false);
             });
@@ -170,6 +179,14 @@ namespace SecondLaw
         private static string Shorten(string value)
         {
             return value.Length <= 28 ? value : value.Substring(0, 25) + "...";
+        }
+
+        private void ToggleLanguage()
+        {
+            LocalizationService.ToggleLanguage();
+            Destroy(canvas.gameObject);
+            Build();
+            Show(lastRewardMessages);
         }
     }
 }

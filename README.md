@@ -6,6 +6,7 @@ This repo is intentionally script-first: placeholder sprites, combat objects, th
 
 ## Controls
 
+- The demo starts in Chinese. Use the `English` / `中文` button in the guild or battle HUD to switch languages.
 - `A/S/D/W`: move on the LF2-style `x/y` arena plane
 - `J`: basic attack
 - `K`: jump

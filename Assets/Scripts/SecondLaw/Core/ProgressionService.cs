@@ -78,16 +78,16 @@ namespace SecondLaw
             State.experience += quest.rewardExperience;
             State.gold += quest.rewardGold;
             State.reputation += quest.rewardReputation;
-            messages.Add("+" + quest.rewardExperience + " EXP");
-            messages.Add("+" + quest.rewardGold + " Gold");
-            messages.Add("+" + quest.rewardReputation + " Guild Reputation");
+            messages.Add("+" + quest.rewardExperience + " " + LocalizationService.T("reward.exp"));
+            messages.Add("+" + quest.rewardGold + " " + LocalizationService.T("reward.gold"));
+            messages.Add("+" + quest.rewardReputation + " " + LocalizationService.T("reward.reputation"));
 
             while (State.level < 10 && State.experience >= ExperienceForNextLevel(State.level))
             {
                 State.experience -= ExperienceForNextLevel(State.level);
                 State.level++;
                 State.talentPoints++;
-                messages.Add("Level Up! Lv" + State.level + " / Talent Point +" + 1);
+                messages.Add(LocalizationService.T("reward.level_up") + State.level + LocalizationService.T("reward.talent") + 1);
             }
 
             Save();
@@ -109,7 +109,8 @@ namespace SecondLaw
         {
             State = new ProgressionState();
             PlayerPrefs.DeleteKey(SaveKey);
-            PlayerPrefs.DeleteKey(LetterCacheService.CachePrefix + "slime_thanks");
+            PlayerPrefs.DeleteKey(LetterCacheService.CachePrefix + "zh.slime_thanks");
+            PlayerPrefs.DeleteKey(LetterCacheService.CachePrefix + "en.slime_thanks");
             PlayerPrefs.Save();
         }
 

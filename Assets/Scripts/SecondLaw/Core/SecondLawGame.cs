@@ -67,14 +67,14 @@ namespace SecondLaw
             }
             else
             {
-                ShowGuild(new[] { "Retreated from battle. No rewards granted." });
+                ShowGuild(new[] { LocalizationService.T("battle.retreat") });
             }
         }
 
         public void ResetProgress()
         {
             Progression.Reset();
-            ShowGuild(new[] { "Demo progress reset." });
+            ShowGuild(new[] { LocalizationService.T("demo.reset") });
         }
 
         public IReadOnlyList<SkillDefinition> Skills()

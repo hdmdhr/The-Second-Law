@@ -8,15 +8,13 @@ namespace SecondLaw
 
         public static string GetOrCreateLetter(LetterTemplate template)
         {
-            string key = CachePrefix + template.templateId;
+            string key = CachePrefix + LocalizationService.CurrentLanguageCode + "." + template.templateId;
             if (PlayerPrefs.HasKey(key))
             {
                 return PlayerPrefs.GetString(key);
             }
 
-            string generated = template.body +
-                "\n\n-- cached local letter draft --\n" +
-                "This text is stored locally now; the same hook can later call an AI provider and cache the result.";
+            string generated = LocalizationService.T("letter.slime.body") + LocalizationService.T("cache.note");
             PlayerPrefs.SetString(key, generated);
             PlayerPrefs.Save();
             return generated;
