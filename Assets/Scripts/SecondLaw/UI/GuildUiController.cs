@@ -49,9 +49,17 @@ namespace SecondLaw
 
             RectTransform background = RuntimeUi.AddPanel(canvas.transform, "Guild Background", new Color(0.13f, 0.10f, 0.08f, 1f));
             RuntimeUi.Stretch(background, 0f, 0f, 0f, 0f);
+            Image backgroundImage = background.GetComponent<Image>();
+            Sprite guildBackground = Resources.Load<Sprite>("Art/Guild/demo-bg-0");
+            if (guildBackground != null)
+            {
+                backgroundImage.sprite = guildBackground;
+                backgroundImage.color = Color.white;
+                backgroundImage.preserveAspect = true;
+            }
 
-            RectTransform artBand = RuntimeUi.AddPanel(canvas.transform, "Guild Illustration", new Color(0.28f, 0.18f, 0.12f, 1f));
-            RuntimeUi.SetRect(artBand, new Vector2(0f, 0.57f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+            RectTransform readabilityShade = RuntimeUi.AddPanel(canvas.transform, "Readability Shade", new Color(0.02f, 0.02f, 0.03f, 0.18f));
+            RuntimeUi.Stretch(readabilityShade, 0f, 0f, 0f, 0f);
 
             Text title = RuntimeUi.AddText(canvas.transform, "Title", LocalizationService.T("guild.title"), 38, new Color(1f, 0.91f, 0.72f), TextAnchor.UpperLeft);
             RuntimeUi.SetRect(title.rectTransform, new Vector2(0.05f, 0.83f), new Vector2(0.78f, 0.97f), Vector2.zero, Vector2.zero);
