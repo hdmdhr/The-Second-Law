@@ -44,11 +44,15 @@ namespace SecondLaw
                 }
 
                 slime.Move(movement * (slime.Stats.moveSpeed * Time.deltaTime));
+                slime.PlayLoop(CombatAnimationType.Walk);
                 return;
             }
 
+            slime.PlayLoop(CombatAnimationType.Idle);
+
             if (attackCooldown <= 0f)
             {
+                slime.PlayOnce(CombatAnimationType.Attack01, 0.45f);
                 battle.PerformMeleeAttack(slime, new[] { player }, 0.95f, 0.42f, slime.Stats.attackPower, 0.9f, 0.25f, 1);
                 attackCooldown = 1.35f;
             }

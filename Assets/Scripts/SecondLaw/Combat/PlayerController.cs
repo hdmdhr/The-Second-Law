@@ -15,6 +15,7 @@ namespace SecondLaw
         private float comboTimer;
         private ComboDirection comboDirection = ComboDirection.None;
         private bool shortcutPrimed;
+        private bool movedThisFrame;
 
         private enum ComboDirection
         {
@@ -48,6 +49,7 @@ namespace SecondLaw
             TickCooldowns();
             TickCombo();
             HandleMovement();
+            combatant.PlayLoop(movedThisFrame ? CombatAnimationType.Walk : CombatAnimationType.Idle);
             HandleJumpVisual();
             HandleActions();
         }
@@ -69,6 +71,8 @@ namespace SecondLaw
             {
                 input.Normalize();
             }
+
+            movedThisFrame = input.sqrMagnitude > 0.01f;
 
             Vector2 delta = input * (combatant.Stats.moveSpeed * Time.deltaTime);
             Vector3 next = combatant.transform.position + (Vector3)delta;
@@ -254,6 +258,7 @@ namespace SecondLaw
 
         private void BasicAttack()
         {
+            combatant.PlayOnce(CombatAnimationType.Attack01);
             float damage = combatant.Stats.attackPower;
             battle.PerformMeleeAttack(combatant, battle.Enemies, 1.15f, 0.42f, damage, 1.2f, 0.2f);
 
@@ -286,24 +291,30 @@ namespace SecondLaw
             switch (skill.effectType)
             {
                 case SkillEffectType.Uppercut:
+                    combatant.PlayOnce(CombatAnimationType.Attack01, 0.42f);
                     jumpTimer = JumpDuration;
                     combatant.transform.position += Vector3.right * combatant.Facing * 0.35f;
                     battle.PerformMeleeAttack(combatant, battle.Enemies, skill.range, skill.depthTolerance, damage, skill.knockback, skill.stunSeconds);
                     break;
                 case SkillEffectType.Bullet:
+                    combatant.PlayOnce(CombatAnimationType.Attack02, 0.28f);
                     battle.FireProjectile(combatant, damage, skill.range, skill.depthTolerance);
                     break;
                 case SkillEffectType.BurstShot:
+                    combatant.PlayOnce(CombatAnimationType.Attack02, 0.58f);
                     combatant.transform.position -= Vector3.right * combatant.Facing * 0.25f;
                     StartCoroutine(FireBurst(skill, damage));
                     break;
                 case SkillEffectType.Knockdown:
+                    combatant.PlayOnce(CombatAnimationType.Attack03, 0.5f);
                     battle.PerformMeleeAttack(combatant, battle.Enemies, skill.range, skill.depthTolerance, damage, skill.knockback, skill.stunSeconds, 3);
                     break;
                 case SkillEffectType.Charm:
+                    combatant.PlayOnce(CombatAnimationType.Attack03, 0.38f);
                     battle.PerformCharm(combatant, skill.range, skill.depthTolerance, skill.stunSeconds);
                     break;
                 case SkillEffectType.MachineGun:
+                    combatant.PlayOnce(CombatAnimationType.Attack03, 0.72f);
                     StartCoroutine(FireMachineGun(skill, damage));
                     battle.PerformMeleeAttack(combatant, battle.Enemies, skill.range, skill.depthTolerance, damage, skill.knockback, skill.stunSeconds);
                     break;

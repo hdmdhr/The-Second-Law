@@ -16,7 +16,7 @@ namespace SecondLaw
             stats.reloadSeconds = 2.4f;
             stats.attackPower = 13f;
             stats.defense = 1f;
-            stats.moveSpeed = 4.8f;
+            stats.moveSpeed = 2.4f;
             stats.jumpHeight = 1.1f;
             return stats;
         }
@@ -30,7 +30,7 @@ namespace SecondLaw
             stats.maxAmmo = 0;
             stats.attackPower = 8f;
             stats.defense = 0f;
-            stats.moveSpeed = 2.3f;
+            stats.moveSpeed = 1.15f;
             return stats;
         }
 

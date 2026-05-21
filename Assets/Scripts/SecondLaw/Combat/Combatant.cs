@@ -14,6 +14,7 @@ namespace SecondLaw
         public bool IsPlayer { get; private set; }
         public Transform VisualRoot { get; private set; }
         public SpriteRenderer BodyRenderer { get; private set; }
+        public SpriteSheetAnimator Animator { get; private set; }
         public float Depth => transform.position.y;
         public bool IsDisabled => stunTimer > 0f || charmTimer > 0f;
         public bool IsGuarding { get; set; }
@@ -42,6 +43,22 @@ namespace SecondLaw
             BodyRenderer.color = normalColor;
         }
 
+        public void AttachSpriteSheetAnimator(string resourceRoot)
+        {
+            if (BodyRenderer == null)
+            {
+                return;
+            }
+
+            Animator = VisualRoot.gameObject.AddComponent<SpriteSheetAnimator>();
+            Animator.Initialize(BodyRenderer, resourceRoot);
+            if (Animator.HasAnimation(CombatAnimationType.Idle))
+            {
+                BodyRenderer.color = Color.white;
+                normalColor = Color.white;
+            }
+        }
+
         private void Update()
         {
             float dt = Time.deltaTime;
@@ -58,11 +75,17 @@ namespace SecondLaw
             if (charmTimer > 0f)
             {
                 charmTimer -= dt;
-                BodyRenderer.color = Color.Lerp(normalColor, new Color(1f, 0.42f, 0.86f), 0.55f);
+                if (BodyRenderer != null)
+                {
+                    BodyRenderer.color = Color.Lerp(normalColor, new Color(1f, 0.42f, 0.86f), 0.55f);
+                }
             }
             else
             {
-                BodyRenderer.color = normalColor;
+                if (BodyRenderer != null)
+                {
+                    BodyRenderer.color = normalColor;
+                }
             }
 
             if (Stats.maxStamina > 0)
@@ -143,7 +166,11 @@ namespace SecondLaw
             CurrentHealth -= damage;
             stunTimer = Mathf.Max(stunTimer, stunSeconds);
             knockbackVelocity += knockback;
-            StartCoroutine(Flash());
+            PlayOnce(CombatAnimationType.Hurt);
+            if (Animator == null)
+            {
+                StartCoroutine(Flash());
+            }
 
             if (CurrentHealth <= 0f)
             {
@@ -182,9 +209,29 @@ namespace SecondLaw
         private void Die()
         {
             IsAlive = false;
-            BodyRenderer.color = new Color(0.25f, 0.25f, 0.25f, 0.75f);
+            PlayOnce(CombatAnimationType.Death, 0.8f);
+            if (Animator == null)
+            {
+                BodyRenderer.color = new Color(0.55f, 0.55f, 0.55f, 0.85f);
+            }
             Died?.Invoke(this);
             Destroy(gameObject, 0.8f);
+        }
+
+        public void PlayLoop(CombatAnimationType animationType)
+        {
+            if (Animator != null)
+            {
+                Animator.PlayLoop(animationType);
+            }
+        }
+
+        public void PlayOnce(CombatAnimationType animationType, float lockSeconds = 0.28f)
+        {
+            if (Animator != null)
+            {
+                Animator.PlayOnce(animationType, CombatAnimationType.Idle, lockSeconds);
+            }
         }
     }
 }

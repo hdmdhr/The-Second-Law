@@ -25,9 +25,9 @@ namespace SecondLaw
 
             SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
-            renderer.color = new Color(1f, 0.92f, 0.45f);
+            renderer.color = Color.white;
             renderer.sortingOrder = owner.BodyRenderer.sortingOrder + 1;
-            transform.localScale = new Vector3(0.25f, 0.12f, 1f);
+            transform.localScale = new Vector3(direction, 1f, 1f);
         }
 
         private void Update()

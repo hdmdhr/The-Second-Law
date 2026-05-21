@@ -37,10 +37,15 @@ namespace SecondLaw
         private void BuildBattle()
         {
             CreateArena();
-            bulletSprite = SpriteFactory.MakeRectSprite("Bullet", new Color(1f, 0.88f, 0.25f), 24, 8);
+            bulletSprite = LoadSingleSprite("Art/Projectiles/Arrow01", 32, 32, 32f);
+            if (bulletSprite == null)
+            {
+                bulletSprite = SpriteFactory.MakeRectSprite("Bullet", new Color(1f, 0.88f, 0.25f), 24, 8);
+            }
 
             Sprite playerSprite = SpriteFactory.MakeSprite("UniformValkyrie", new Color(0.30f, 0.48f, 0.96f), new Color(1f, 0.87f, 0.95f));
             Player = CreateCombatant("Uniform Valkyrie", game.Progression.BuildPlayerStats(game.PlayerBaseStats), playerSprite, new Vector2(-3.2f, -0.6f), true);
+            Player.AttachSpriteSheetAnimator("Art/Characters/Soldier/Soldier");
             Player.gameObject.AddComponent<PlayerController>().Initialize(this, game.Progression);
             Player.Died += _ => EndBattle(false);
 
@@ -49,6 +54,7 @@ namespace SecondLaw
             {
                 Vector2 position = new Vector2(1.8f + i * 1.35f, -0.95f + i * 0.55f);
                 Combatant slime = CreateCombatant("Slime " + (i + 1), game.SlimeBaseStats.CloneRuntime(), slimeSprite, position, false);
+                slime.AttachSpriteSheetAnimator("Art/Characters/Orc/Orc");
                 slime.gameObject.AddComponent<SlimeAI>().Initialize(this, Player);
                 slime.Died += OnEnemyDied;
                 enemies.Add(slime);
@@ -63,6 +69,18 @@ namespace SecondLaw
             Combatant combatant = entity.AddComponent<Combatant>();
             combatant.Initialize(stats, sprite, player);
             return combatant;
+        }
+
+        private static Sprite LoadSingleSprite(string resourcePath, int width, int height, float pixelsPerUnit)
+        {
+            Texture2D texture = Resources.Load<Texture2D>(resourcePath);
+            if (texture == null)
+            {
+                return null;
+            }
+
+            Rect rect = new Rect(0, 0, Mathf.Min(width, texture.width), Mathf.Min(height, texture.height));
+            return Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
         }
 
         private void CreateArena()
@@ -97,7 +115,8 @@ namespace SecondLaw
         public void PerformMeleeAttack(Combatant attacker, IEnumerable<Combatant> targets, float range, float depthTolerance, float damage, float knockback, float stun, int maxTargets = 99)
         {
             int hitCount = 0;
-            foreach (Combatant target in targets)
+            List<Combatant> targetSnapshot = new List<Combatant>(targets);
+            foreach (Combatant target in targetSnapshot)
             {
                 if (target == null || !target.IsAlive || target == attacker)
                 {

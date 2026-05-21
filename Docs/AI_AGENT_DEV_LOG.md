@@ -10,6 +10,8 @@
 - Enemy scope is one slime type with simple chase/attack AI.
 - UI language defaults to Chinese and can toggle to English at runtime.
 - Guild main UI uses `Assets/Resources/Art/Guild/demo-bg-0.png` as the generated background.
+- Player/enemy visuals now use PNG spritesheets from Tiny RPG Character Asset Pack: Soldier for player, Orc for enemy placeholder.
+- `AGENTS.md` is the project guide for future coding agents.
 
 ## Key Commits
 
@@ -28,6 +30,8 @@
 - `Assets/Scripts/SecondLaw/Combat/PlayerController.cs`: ASDW movement and combo input (`L > direction > action`).
 - `Assets/Scripts/SecondLaw/Combat/BattleController.cs`: arena setup, player/slime spawning, hit queries, victory.
 - `Assets/Scripts/SecondLaw/Combat/Combatant.cs`: HP/stamina/ammo, damage, guard, stun/charm, death.
+- `Assets/Scripts/SecondLaw/Combat/SpriteSheetAnimator.cs`: runtime 100x100 PNG spritesheet slicing and simple loop/one-shot animation playback.
+- `AGENTS.md`: project north star, verification checklist, and documentation rules.
 
 ## Current Controls
 
@@ -46,3 +50,5 @@
 - No real animation, audio, title logo, save file UI, or AI API provider yet.
 - Balance is placeholder and needs hands-on tuning in Unity.
 - Localization uses in-code dictionaries; move to JSON/ScriptableObject later if text grows.
+- Before each code/resource commit, update this log and the Notion beginner architecture doc.
+- TODO: Soldier idle animation still appears to drift horizontally frame-by-frame in Unity. Likely cause is uneven frame alignment inside the source spritesheet; next fix should either pin idle to a single frame or add per-frame visual offsets/crop normalization in `SpriteSheetAnimator`.

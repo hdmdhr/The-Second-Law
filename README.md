@@ -26,6 +26,7 @@ This repo is intentionally script-first: placeholder sprites, combat objects, th
 - Single-player local demo
 - Uniform Valkyrie job from Lv1-Lv10, excluding the undefined `花容凶器`
 - One slime enemy species with close-range AI
+- Soldier/Orc PNG spritesheet placeholders for the player and enemy visuals
 - Pseudo-3D depth-axis melee checks
 - Ammo, stamina, reload, knockback, stun, charm, death, and victory states
 - Guild quest UI, battle launch, reward settlement, level-up flow
