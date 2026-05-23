@@ -12,6 +12,7 @@
 - Guild main UI now uses UI Toolkit for the guild hall entry, transparent mouse hotspots, and counter/placeholder pages.
 - Guild hall uses `Assets/Resources/Art/Guild/demo-bg-0.png` as the entry background.
 - Counter hotspot plays `Assets/Resources/Video/Guild/lobby-to-desk.mp4` at 1.5x speed before opening the counter page, unless cutscenes are skipped.
+- Counter transition now prepares the video first and waits for the first frame before hiding the guild UI, reducing the visible click-to-video flash.
 - Unity Video and Audio built-in modules are enabled in `Packages/manifest.json` for the counter transition video.
 - `Assets/Resources/UI/Guild/UnityDefaultRuntimeTheme.tss` supplies the runtime UI Toolkit default theme.
 - Player/enemy visuals now use PNG spritesheets from Tiny RPG Character Asset Pack: Soldier for player, Orc for enemy placeholder.
@@ -22,6 +23,7 @@
 - `0f694bd` Initial Unity demo prototype
 - `68f6fff` Add runtime localization toggle
 - `8d320f6` Use generated guild background
+- `93c43d1` 修复柜台转场闪烁
 
 ## Important Files
 

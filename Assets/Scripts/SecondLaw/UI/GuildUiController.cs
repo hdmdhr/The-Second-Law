@@ -32,6 +32,7 @@ namespace SecondLaw
         private VideoClip counterTransitionClip;
         private VideoPlayer transitionPlayer;
         private bool counterVideoBackgroundActive;
+        private bool preparingCounterTransition;
         private bool debugHotspots;
         private bool counterPageVisible;
         private bool counterCompletedQuest;
@@ -117,6 +118,7 @@ namespace SecondLaw
             counterTransitionClip = Resources.Load<VideoClip>("Video/Guild/lobby-to-desk");
             BindElements();
             ApplyBackgrounds();
+            ApplyInlineLayout();
             RefreshStaticLabels();
         }
 
@@ -174,9 +176,10 @@ namespace SecondLaw
 
         private void ApplyBackgrounds()
         {
-            Texture2D guildBackground = Resources.Load<Texture2D>("Art/Guild/demo-bg-0");
+            Sprite guildBackground = Resources.Load<Sprite>("Art/Guild/demo-bg-0");
             if (guildBackground == null)
             {
+                Debug.LogWarning("Guild background sprite was not found at Resources/Art/Guild/demo-bg-0.");
                 return;
             }
 
@@ -185,11 +188,153 @@ namespace SecondLaw
             pageBackground.style.backgroundImage = background;
         }
 
+        private void ApplyInlineLayout()
+        {
+            root.style.flexGrow = 1f;
+            root.style.width = Length.Percent(100f);
+            root.style.height = Length.Percent(100f);
+
+            VisualElement guildBackground = documentRoot.Q<VisualElement>("guild-background");
+            SetAbsoluteFill(guildBackground);
+            guildBackground.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
+
+            VisualElement guildShade = documentRoot.Q<VisualElement>("guild-shade");
+            SetAbsoluteFill(guildShade);
+            guildShade.style.backgroundColor = new Color(0.02f, 0.02f, 0.03f, 0.10f);
+
+            SetAbsoluteFill(hubLayer);
+            SetAbsoluteFill(pageLayer);
+            SetAbsoluteFill(pageBackground);
+            SetAbsoluteFill(pageDim);
+            pageBackground.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
+            pageDim.style.backgroundColor = new Color(0.02f, 0.02f, 0.03f, 0.42f);
+
+            VisualElement topBar = documentRoot.Q<VisualElement>("top-bar");
+            topBar.style.position = Position.Absolute;
+            topBar.style.top = 20f;
+            topBar.style.right = 24f;
+            topBar.style.flexDirection = FlexDirection.Row;
+            topBar.style.alignItems = Align.Center;
+
+            StyleTopButton(documentRoot.Q<Button>("language-button"));
+            StyleTopButton(documentRoot.Q<Button>("debug-button"));
+            StyleTopButton(documentRoot.Q<Button>("page-language-button"));
+            StyleTopButton(documentRoot.Q<Button>("back-button"));
+            StyleTopButton(documentRoot.Q<Button>("placeholder-back-button"));
+            StyleTopButton(documentRoot.Q<Button>("start-quest-button"));
+            StyleTopButton(documentRoot.Q<Button>("reset-button"));
+            StyleTopButton(sendReplyButton);
+
+            skipToggle.style.height = 42f;
+            skipToggle.style.marginLeft = 8f;
+            skipToggle.style.paddingLeft = 12f;
+            skipToggle.style.paddingRight = 12f;
+            skipToggle.style.backgroundColor = new Color(0.08f, 0.08f, 0.10f, 0.70f);
+            skipToggle.style.color = new Color(0.96f, 0.91f, 0.80f, 1f);
+
+            VisualElement hotspotLayer = documentRoot.Q<VisualElement>("hotspot-layer");
+            SetAbsoluteFill(hotspotLayer);
+            ConfigureHotspot("counter-hotspot", 0f, 27f, 37f, 48f);
+            ConfigureHotspot("board-hotspot", 68f, 30f, 29f, 48f);
+            ConfigureHotspot("table-hotspot", 58f, 64f, 42f, 36f);
+            ConfigureHotspot("shop-hotspot", 0f, 70f, 22f, 30f);
+        }
+
+        private static void SetAbsoluteFill(VisualElement element)
+        {
+            element.style.position = Position.Absolute;
+            element.style.left = 0f;
+            element.style.right = 0f;
+            element.style.top = 0f;
+            element.style.bottom = 0f;
+        }
+
+        private static void StyleTopButton(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.style.height = 42f;
+            button.style.marginLeft = 8f;
+            button.style.paddingLeft = 16f;
+            button.style.paddingRight = 16f;
+            button.style.backgroundColor = new Color(0.12f, 0.13f, 0.16f, 0.86f);
+            button.style.color = new Color(1f, 0.94f, 0.82f, 1f);
+            button.style.borderLeftColor = new Color(1f, 0.86f, 0.58f, 0.42f);
+            button.style.borderRightColor = new Color(1f, 0.86f, 0.58f, 0.42f);
+            button.style.borderTopColor = new Color(1f, 0.86f, 0.58f, 0.42f);
+            button.style.borderBottomColor = new Color(1f, 0.86f, 0.58f, 0.42f);
+            button.style.borderLeftWidth = 1f;
+            button.style.borderRightWidth = 1f;
+            button.style.borderTopWidth = 1f;
+            button.style.borderBottomWidth = 1f;
+        }
+
+        private void ConfigureHotspot(string name, float left, float top, float width, float height)
+        {
+            VisualElement hotspot = documentRoot.Q<VisualElement>(name);
+            hotspot.style.position = Position.Absolute;
+            hotspot.style.left = Length.Percent(left);
+            hotspot.style.top = Length.Percent(top);
+            hotspot.style.width = Length.Percent(width);
+            hotspot.style.height = Length.Percent(height);
+            hotspot.style.backgroundColor = new Color(1f, 0.88f, 0.32f, 0f);
+            SetHotspotBorder(hotspot, new Color(1f, 0.88f, 0.32f, 0f), 0f);
+
+            Label label = hotspot.Q<Label>();
+            if (label != null)
+            {
+                label.style.position = Position.Absolute;
+                label.style.left = 0f;
+                label.style.right = 0f;
+                label.style.top = Length.Percent(44f);
+                label.style.unityTextAlign = TextAnchor.MiddleCenter;
+                label.style.color = new Color(1f, 0.92f, 0.72f, 1f);
+                label.style.backgroundColor = new Color(0.04f, 0.035f, 0.03f, 0.74f);
+                label.style.paddingTop = 8f;
+                label.style.paddingBottom = 8f;
+                label.style.display = DisplayStyle.None;
+            }
+        }
+
+        private static void SetHotspotBorder(VisualElement hotspot, Color color, float width)
+        {
+            hotspot.style.borderLeftColor = color;
+            hotspot.style.borderRightColor = color;
+            hotspot.style.borderTopColor = color;
+            hotspot.style.borderBottomColor = color;
+            hotspot.style.borderLeftWidth = width;
+            hotspot.style.borderRightWidth = width;
+            hotspot.style.borderTopWidth = width;
+            hotspot.style.borderBottomWidth = width;
+        }
+
         private void RegisterHotspot(string name, System.Action onClick)
         {
             VisualElement hotspot = documentRoot.Q<VisualElement>(name);
             hotspot.pickingMode = PickingMode.Position;
+            hotspot.RegisterCallback<PointerEnterEvent>(_ => SetHotspotHovered(hotspot, true));
+            hotspot.RegisterCallback<PointerLeaveEvent>(_ => SetHotspotHovered(hotspot, false));
             hotspot.RegisterCallback<ClickEvent>(_ => onClick());
+        }
+
+        private void SetHotspotHovered(VisualElement hotspot, bool hovered)
+        {
+            if (!hovered && debugHotspots)
+            {
+                return;
+            }
+
+            hotspot.style.backgroundColor = hovered ? new Color(1f, 0.88f, 0.32f, 0.15f) : new Color(1f, 0.88f, 0.32f, 0f);
+            SetHotspotBorder(hotspot, hovered ? new Color(1f, 0.88f, 0.32f, 0.82f) : new Color(1f, 0.88f, 0.32f, 0f), hovered ? 2f : 0f);
+
+            Label label = hotspot.Q<Label>();
+            if (label != null)
+            {
+                label.style.display = hovered ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         private void RefreshStaticLabels()
@@ -230,7 +375,7 @@ namespace SecondLaw
 
         private void OpenCounterWithTransition()
         {
-            if (transitionPlayer != null && transitionPlayer.isPlaying)
+            if (preparingCounterTransition || (transitionPlayer != null && transitionPlayer.isPlaying))
             {
                 return;
             }
@@ -263,10 +408,19 @@ namespace SecondLaw
             transitionPlayer.playbackSpeed = CounterTransitionSpeed;
             transitionPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
             transitionPlayer.isLooping = false;
+            transitionPlayer.playOnAwake = false;
+            transitionPlayer.waitForFirstFrame = true;
+            transitionPlayer.prepareCompleted += OnCounterTransitionPrepared;
             transitionPlayer.loopPointReached += OnCounterTransitionComplete;
-            transitionPlayer.Play();
+            preparingCounterTransition = true;
+            transitionPlayer.Prepare();
+        }
 
+        private void OnCounterTransitionPrepared(VideoPlayer player)
+        {
+            preparingCounterTransition = false;
             SetDisplay(documentRoot, false);
+            player.Play();
         }
 
         private void OnCounterTransitionComplete(VideoPlayer player)
@@ -439,13 +593,17 @@ namespace SecondLaw
         private void ToggleDebugHotspots()
         {
             debugHotspots = !debugHotspots;
-            if (debugHotspots)
+            foreach (string hotspotName in new[] { "counter-hotspot", "board-hotspot", "table-hotspot", "shop-hotspot" })
             {
-                root.AddToClassList("show-hotspots");
-            }
-            else
-            {
-                root.RemoveFromClassList("show-hotspots");
+                VisualElement hotspot = documentRoot.Q<VisualElement>(hotspotName);
+                hotspot.style.backgroundColor = debugHotspots ? new Color(0.20f, 0.62f, 1f, 0.16f) : new Color(1f, 0.88f, 0.32f, 0f);
+                SetHotspotBorder(hotspot, debugHotspots ? new Color(0.20f, 0.62f, 1f, 0.85f) : new Color(1f, 0.88f, 0.32f, 0f), debugHotspots ? 2f : 0f);
+
+                Label label = hotspot.Q<Label>();
+                if (label != null)
+                {
+                    label.style.display = debugHotspots ? DisplayStyle.Flex : DisplayStyle.None;
+                }
             }
         }
 
@@ -456,7 +614,9 @@ namespace SecondLaw
                 return;
             }
 
+            preparingCounterTransition = false;
             transitionPlayer.loopPointReached -= OnCounterTransitionComplete;
+            transitionPlayer.prepareCompleted -= OnCounterTransitionPrepared;
             Destroy(transitionPlayer.gameObject);
             transitionPlayer = null;
         }
