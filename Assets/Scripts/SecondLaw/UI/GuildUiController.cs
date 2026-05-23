@@ -10,8 +10,11 @@ namespace SecondLaw
     {
         private const string SkipTransitionKey = "SecondLaw.SkipGuildTransitions";
         private const float CounterTransitionSpeed = 1.5f;
+        private const float HotspotAlphaThreshold = 0.2f;
+        private const int HotspotOutlineRadius = 5;
 
         private SecondLawGame game;
+        private readonly List<GuildHotspot> hotspots = new List<GuildHotspot>();
         private UIDocument document;
         private VisualElement documentRoot;
         private VisualElement root;
@@ -234,10 +237,11 @@ namespace SecondLaw
 
             VisualElement hotspotLayer = documentRoot.Q<VisualElement>("hotspot-layer");
             SetAbsoluteFill(hotspotLayer);
-            ConfigureHotspot("counter-hotspot", 0f, 27f, 37f, 48f);
-            ConfigureHotspot("board-hotspot", 68f, 30f, 29f, 48f);
-            ConfigureHotspot("table-hotspot", 58f, 64f, 42f, 36f);
-            ConfigureHotspot("shop-hotspot", 0f, 70f, 22f, 30f);
+            hotspots.Clear();
+            ConfigureImageHotspot("counter-hotspot", "Art/Guild/Hotspots/counter-zone");
+            ConfigureImageHotspot("board-hotspot", "Art/Guild/Hotspots/board-icon");
+            ConfigureImageHotspot("table-hotspot", "Art/Guild/Hotspots/table-zone");
+            ConfigureImageHotspot("shop-hotspot", "Art/Guild/Hotspots/equipment-zone");
         }
 
         private static void SetAbsoluteFill(VisualElement element)
@@ -272,16 +276,35 @@ namespace SecondLaw
             button.style.borderBottomWidth = 1f;
         }
 
-        private void ConfigureHotspot(string name, float left, float top, float width, float height)
+        private void ConfigureImageHotspot(string name, string spritePath)
         {
             VisualElement hotspot = documentRoot.Q<VisualElement>(name);
             hotspot.style.position = Position.Absolute;
-            hotspot.style.left = Length.Percent(left);
-            hotspot.style.top = Length.Percent(top);
-            hotspot.style.width = Length.Percent(width);
-            hotspot.style.height = Length.Percent(height);
-            hotspot.style.backgroundColor = new Color(1f, 0.88f, 0.32f, 0f);
-            SetHotspotBorder(hotspot, new Color(1f, 0.88f, 0.32f, 0f), 0f);
+            hotspot.style.left = 0f;
+            hotspot.style.top = 0f;
+            hotspot.style.right = 0f;
+            hotspot.style.bottom = 0f;
+            hotspot.style.width = Length.Percent(100f);
+            hotspot.style.height = Length.Percent(100f);
+            hotspot.style.backgroundColor = Color.clear;
+            hotspot.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
+            hotspot.pickingMode = PickingMode.Ignore;
+
+            Sprite sprite = Resources.Load<Sprite>(spritePath);
+            Texture2D texture = sprite != null ? sprite.texture : null;
+            if (sprite == null || texture == null)
+            {
+                Debug.LogWarning("Guild hotspot sprite was not found or is not readable at Resources/" + spritePath + ".");
+            }
+            else
+            {
+                VisualElement highlight = CreateHotspotImageLayer(name + "-highlight", sprite);
+                VisualElement outline = CreateHotspotImageLayer(name + "-outline", CreateOutlineSprite(name, texture));
+                highlight.style.opacity = 0f;
+                outline.style.opacity = 0f;
+                hotspot.Insert(0, highlight);
+                hotspot.Insert(1, outline);
+            }
 
             Label label = hotspot.Q<Label>();
             if (label != null)
@@ -297,43 +320,235 @@ namespace SecondLaw
                 label.style.paddingBottom = 8f;
                 label.style.display = DisplayStyle.None;
             }
+
+            VisualElement highlightLayer = hotspot.Q<VisualElement>(name + "-highlight");
+            VisualElement outlineLayer = hotspot.Q<VisualElement>(name + "-outline");
+            hotspots.Add(new GuildHotspot(name, hotspot, highlightLayer, outlineLayer, texture));
         }
 
-        private static void SetHotspotBorder(VisualElement hotspot, Color color, float width)
+        private static VisualElement CreateHotspotImageLayer(string name, Sprite sprite)
         {
-            hotspot.style.borderLeftColor = color;
-            hotspot.style.borderRightColor = color;
-            hotspot.style.borderTopColor = color;
-            hotspot.style.borderBottomColor = color;
-            hotspot.style.borderLeftWidth = width;
-            hotspot.style.borderRightWidth = width;
-            hotspot.style.borderTopWidth = width;
-            hotspot.style.borderBottomWidth = width;
+            VisualElement layer = new VisualElement { name = name };
+            SetAbsoluteFill(layer);
+            layer.pickingMode = PickingMode.Ignore;
+            layer.style.backgroundColor = Color.clear;
+            layer.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
+
+            if (sprite != null)
+            {
+                layer.style.backgroundImage = new StyleBackground(sprite);
+            }
+
+            return layer;
         }
 
         private void RegisterHotspot(string name, System.Action onClick)
         {
             VisualElement hotspot = documentRoot.Q<VisualElement>(name);
-            hotspot.pickingMode = PickingMode.Position;
-            hotspot.RegisterCallback<PointerEnterEvent>(_ => SetHotspotHovered(hotspot, true));
-            hotspot.RegisterCallback<PointerLeaveEvent>(_ => SetHotspotHovered(hotspot, false));
-            hotspot.RegisterCallback<ClickEvent>(_ => onClick());
+            hotspot.pickingMode = PickingMode.Ignore;
+            hotspot.userData = onClick;
         }
 
-        private void SetHotspotHovered(VisualElement hotspot, bool hovered)
+        private void Update()
         {
-            if (!hovered && debugHotspots)
+            if (hubLayer == null || hubLayer.resolvedStyle.display == DisplayStyle.None || transitionPlayer != null)
             {
                 return;
             }
 
-            hotspot.style.backgroundColor = hovered ? new Color(1f, 0.88f, 0.32f, 0.15f) : new Color(1f, 0.88f, 0.32f, 0f);
-            SetHotspotBorder(hotspot, hovered ? new Color(1f, 0.88f, 0.32f, 0.82f) : new Color(1f, 0.88f, 0.32f, 0f), hovered ? 2f : 0f);
+            Vector2 pointerPosition = GetPointerPanelPosition();
+            GuildHotspot hovered = FindHotspot(pointerPosition);
 
-            Label label = hotspot.Q<Label>();
+            for (int i = 0; i < hotspots.Count; i++)
+            {
+                SetHotspotHovered(hotspots[i], hotspots[i] == hovered);
+            }
+
+            if (hovered != null && Input.GetMouseButtonDown(0) && hovered.Element.userData is System.Action onClick)
+            {
+                onClick();
+            }
+        }
+
+        private Vector2 GetPointerPanelPosition()
+        {
+            Vector2 screenPosition = Input.mousePosition;
+            if (documentRoot.panel == null)
+            {
+                return new Vector2(screenPosition.x, Screen.height - screenPosition.y);
+            }
+
+            Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(documentRoot.panel, screenPosition);
+            Rect rootRect = documentRoot.worldBound;
+            if (rootRect.height > 0f)
+            {
+                panelPosition.y = rootRect.yMin + rootRect.yMax - panelPosition.y;
+            }
+
+            return panelPosition;
+        }
+
+        private GuildHotspot FindHotspot(Vector2 panelPosition)
+        {
+            for (int i = hotspots.Count - 1; i >= 0; i--)
+            {
+                GuildHotspot hotspot = hotspots[i];
+                if (IsInsideHotspotAlpha(hotspot, panelPosition))
+                {
+                    return hotspot;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool IsInsideHotspotAlpha(GuildHotspot hotspot, Vector2 panelPosition)
+        {
+            if (hotspot.Texture == null)
+            {
+                return false;
+            }
+
+            Rect rect = hotspot.Element.worldBound;
+            if (!TryGetTexturePixel(rect, hotspot.Texture, panelPosition, out int x, out int y))
+            {
+                return false;
+            }
+
+            return hotspot.Texture.GetPixel(x, y).a >= HotspotAlphaThreshold;
+        }
+
+        private static bool TryGetTexturePixel(Rect elementRect, Texture2D texture, Vector2 panelPosition, out int x, out int y)
+        {
+            x = 0;
+            y = 0;
+
+            if (!elementRect.Contains(panelPosition) || elementRect.width <= 0f || elementRect.height <= 0f)
+            {
+                return false;
+            }
+
+            float elementAspect = elementRect.width / elementRect.height;
+            float textureAspect = (float)texture.width / texture.height;
+            float drawWidth;
+            float drawHeight;
+            float drawLeft;
+            float drawTop;
+
+            if (elementAspect > textureAspect)
+            {
+                drawWidth = elementRect.width;
+                drawHeight = elementRect.width / textureAspect;
+                drawLeft = elementRect.xMin;
+                drawTop = elementRect.yMin + (elementRect.height - drawHeight) * 0.5f;
+            }
+            else
+            {
+                drawHeight = elementRect.height;
+                drawWidth = elementRect.height * textureAspect;
+                drawLeft = elementRect.xMin + (elementRect.width - drawWidth) * 0.5f;
+                drawTop = elementRect.yMin;
+            }
+
+            float localX = panelPosition.x - drawLeft;
+            float localY = panelPosition.y - drawTop;
+            if (localX < 0f || localY < 0f || localX > drawWidth || localY > drawHeight)
+            {
+                return false;
+            }
+
+            x = Mathf.Clamp(Mathf.FloorToInt(localX / drawWidth * texture.width), 0, texture.width - 1);
+            y = Mathf.Clamp(Mathf.FloorToInt((1f - localY / drawHeight) * texture.height), 0, texture.height - 1);
+            return true;
+        }
+
+        private void SetHotspotHovered(GuildHotspot hotspot, bool hovered)
+        {
+            if (hotspot.HighlightLayer != null)
+            {
+                hotspot.HighlightLayer.style.opacity = hovered ? 0.78f : debugHotspots ? 0.28f : 0f;
+            }
+
+            if (hotspot.OutlineLayer != null)
+            {
+                hotspot.OutlineLayer.style.opacity = hovered ? 1f : debugHotspots ? 0.65f : 0f;
+            }
+
+            Label label = hotspot.Element.Q<Label>();
             if (label != null)
             {
-                label.style.display = hovered ? DisplayStyle.Flex : DisplayStyle.None;
+                label.style.display = debugHotspots ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+        }
+
+        private static Sprite CreateOutlineSprite(string name, Texture2D source)
+        {
+            try
+            {
+                Color32[] sourcePixels = source.GetPixels32();
+                Color32[] outlinePixels = new Color32[sourcePixels.Length];
+                int width = source.width;
+                int height = source.height;
+                byte alphaThreshold = (byte)Mathf.Clamp(Mathf.RoundToInt(HotspotAlphaThreshold * 255f), 0, 255);
+                Color32 outlineColor = new Color32(255, 178, 56, 255);
+                int radiusSquared = HotspotOutlineRadius * HotspotOutlineRadius;
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (sourcePixels[y * width + x].a < alphaThreshold)
+                        {
+                            continue;
+                        }
+
+                        for (int offsetY = -HotspotOutlineRadius; offsetY <= HotspotOutlineRadius; offsetY++)
+                        {
+                            int targetY = y + offsetY;
+                            if (targetY < 0 || targetY >= height)
+                            {
+                                continue;
+                            }
+
+                            for (int offsetX = -HotspotOutlineRadius; offsetX <= HotspotOutlineRadius; offsetX++)
+                            {
+                                if (offsetX * offsetX + offsetY * offsetY > radiusSquared)
+                                {
+                                    continue;
+                                }
+
+                                int targetX = x + offsetX;
+                                if (targetX < 0 || targetX >= width)
+                                {
+                                    continue;
+                                }
+
+                                int targetIndex = targetY * width + targetX;
+                                if (sourcePixels[targetIndex].a >= alphaThreshold)
+                                {
+                                    continue;
+                                }
+
+                                outlinePixels[targetIndex] = outlineColor;
+                            }
+                        }
+                    }
+                }
+
+                Texture2D outlineTexture = new Texture2D(width, height, TextureFormat.RGBA32, false)
+                {
+                    name = name + " Outline Texture",
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp
+                };
+                outlineTexture.SetPixels32(outlinePixels);
+                outlineTexture.Apply(false, true);
+                return Sprite.Create(outlineTexture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            catch (UnityException ex)
+            {
+                Debug.LogWarning("Could not create guild hotspot outline for " + name + ": " + ex.Message);
+                return null;
             }
         }
 
@@ -593,18 +808,28 @@ namespace SecondLaw
         private void ToggleDebugHotspots()
         {
             debugHotspots = !debugHotspots;
-            foreach (string hotspotName in new[] { "counter-hotspot", "board-hotspot", "table-hotspot", "shop-hotspot" })
+            foreach (GuildHotspot hotspot in hotspots)
             {
-                VisualElement hotspot = documentRoot.Q<VisualElement>(hotspotName);
-                hotspot.style.backgroundColor = debugHotspots ? new Color(0.20f, 0.62f, 1f, 0.16f) : new Color(1f, 0.88f, 0.32f, 0f);
-                SetHotspotBorder(hotspot, debugHotspots ? new Color(0.20f, 0.62f, 1f, 0.85f) : new Color(1f, 0.88f, 0.32f, 0f), debugHotspots ? 2f : 0f);
-
-                Label label = hotspot.Q<Label>();
-                if (label != null)
-                {
-                    label.style.display = debugHotspots ? DisplayStyle.Flex : DisplayStyle.None;
-                }
+                SetHotspotHovered(hotspot, false);
             }
+        }
+
+        private sealed class GuildHotspot
+        {
+            public GuildHotspot(string name, VisualElement element, VisualElement highlightLayer, VisualElement outlineLayer, Texture2D texture)
+            {
+                Name = name;
+                Element = element;
+                HighlightLayer = highlightLayer;
+                OutlineLayer = outlineLayer;
+                Texture = texture;
+            }
+
+            public string Name { get; }
+            public VisualElement Element { get; }
+            public VisualElement HighlightLayer { get; }
+            public VisualElement OutlineLayer { get; }
+            public Texture2D Texture { get; }
         }
 
         private void StopCounterVideo()
