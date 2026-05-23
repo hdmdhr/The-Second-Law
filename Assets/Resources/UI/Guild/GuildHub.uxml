@@ -1,0 +1,76 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="guild-root" class="guild-root">
+        <ui:VisualElement name="hub-layer" class="screen-layer hub-layer">
+            <ui:VisualElement name="guild-background" class="guild-background" />
+            <ui:VisualElement name="guild-shade" class="guild-shade" />
+
+            <ui:VisualElement name="top-bar" class="top-bar">
+                <ui:Button name="language-button" class="top-button" />
+                <ui:Toggle name="skip-toggle" class="skip-toggle" />
+                <ui:Button name="debug-button" class="top-button" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="hotspot-layer" class="hotspot-layer">
+                <ui:VisualElement name="counter-hotspot" class="hotspot counter-hotspot">
+                    <ui:Label name="counter-hotspot-label" class="hotspot-label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="board-hotspot" class="hotspot board-hotspot">
+                    <ui:Label name="board-hotspot-label" class="hotspot-label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="table-hotspot" class="hotspot table-hotspot">
+                    <ui:Label name="table-hotspot-label" class="hotspot-label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="shop-hotspot" class="hotspot shop-hotspot">
+                    <ui:Label name="shop-hotspot-label" class="hotspot-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="page-layer" class="screen-layer page-layer hidden">
+            <ui:VisualElement name="page-background" class="page-background" />
+            <ui:VisualElement name="page-dim" class="page-dim" />
+
+            <ui:VisualElement name="counter-page" class="counter-page">
+                <ui:VisualElement class="page-header">
+                    <ui:Button name="back-button" class="back-button" />
+                    <ui:Label name="counter-title" class="page-title" />
+                    <ui:Button name="page-language-button" class="top-button" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="counter-grid">
+                    <ui:VisualElement class="panel quest-panel">
+                        <ui:Label name="quest-title" class="panel-title" />
+                        <ui:Label name="quest-body" class="body-text" />
+                        <ui:VisualElement class="button-row">
+                            <ui:Button name="start-quest-button" class="primary-button" />
+                            <ui:Button name="reset-button" class="secondary-button" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="panel status-panel">
+                        <ui:Label name="status-title" class="panel-title" />
+                        <ui:Label name="status-text" class="body-text" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="panel letter-panel">
+                        <ui:Label name="letter-title" class="panel-title" />
+                        <ui:ScrollView name="letter-scroll" class="letter-scroll">
+                            <ui:Label name="letter-text" class="letter-text" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="reply-panel" class="reply-panel hidden">
+                    <ui:VisualElement name="reply-columns" class="reply-columns" />
+                    <ui:Button name="send-reply-button" class="primary-button send-reply-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="placeholder-page" class="placeholder-page hidden">
+                <ui:Button name="placeholder-back-button" class="back-button" />
+                <ui:Label name="placeholder-title" class="page-title" />
+                <ui:Label name="placeholder-body" class="body-text placeholder-body" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
