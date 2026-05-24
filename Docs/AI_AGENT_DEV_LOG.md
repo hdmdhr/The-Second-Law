@@ -14,6 +14,7 @@
 - Web hub top bar now uses a transition-speed debug button instead of the hotspot debug toggle; it defaults to 2x and cycles 2x -> 3x -> 4x -> 1x for entry cutscenes while keeping pinned/looping backdrops at 1x.
 - Web/Unity bridge is stubbed in TypeScript with `startQuest`, `setLanguage`, `setSkipTransitions`, `unityReady`, and `battleFinished`; first pass uses a mock battle screen instead of a real Unity WebGL canvas.
 - Web build output is static and can be shared through GitHub Pages; `.github/workflows/deploy-web.yml` builds `web/` on Node 22, sets the Vite base path from the repository name, and publishes `web/dist` as the Pages artifact. Web public asset URLs use `import.meta.env.BASE_URL` so symlinked guild PNG/MP4 files resolve under the Pages project path.
+- GitHub Pages workflow now deploys from `main` only by default, matching the `github-pages` environment protection rule. Deploying from `codex/web-guild-ui` requires adding that branch to the environment's allowed deployment branches in GitHub settings.
 - RPGUI is the chosen reference/library direction for the next Web guild styling pass; RPG CSS was rejected as too small/unproven for this project.
 - Unity UI Toolkit guild remains available as the fallback path until the Web shell connects to real Unity WebGL combat.
 - Job scope is Uniform Valkyrie Lv1-Lv10; undefined `花容凶器` is intentionally excluded.

@@ -42,7 +42,9 @@ After pushing this branch, open the GitHub repository:
 
 1. Go to `Settings -> Pages`.
 2. Set `Build and deployment -> Source` to `GitHub Actions`.
-3. Open `Actions -> Deploy Web Guild to GitHub Pages` and run it manually, or push to `main` / `codex/web-guild-ui`.
+3. Open `Actions -> Deploy Web Guild to GitHub Pages` and run it manually, or push to `main`.
+
+GitHub Pages deployments are restricted by the `github-pages` environment. This workflow deploys from `main` by default. To deploy directly from an experimental branch, add that branch under `Settings -> Environments -> github-pages -> Deployment branches and tags`, or temporarily set the environment to allow all branches.
 
 For this repository, the expected Pages URL is:
 
