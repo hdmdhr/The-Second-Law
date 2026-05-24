@@ -5,10 +5,11 @@ interface TransitionOverlayProps {
   src: string;
   pinned: boolean;
   loop?: boolean;
+  playbackRate?: number;
   onDone: () => void;
 }
 
-export default function TransitionOverlay({ src, pinned, loop = false, onDone }: TransitionOverlayProps) {
+export default function TransitionOverlay({ src, pinned, loop = false, playbackRate = 1, onDone }: TransitionOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const finishedRef = useRef(false);
   const [ready, setReady] = useState(false);
@@ -26,12 +27,18 @@ export default function TransitionOverlay({ src, pinned, loop = false, onDone }:
     }, 12000);
 
     return () => window.clearTimeout(timeout);
-  }, [onDone, pinned]);
+  }, [loop, onDone, pinned]);
 
   useEffect(() => {
     setReady(false);
     finishedRef.current = false;
   }, [src]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate, src]);
 
   function finish() {
     if (finishedRef.current) {
@@ -42,7 +49,7 @@ export default function TransitionOverlay({ src, pinned, loop = false, onDone }:
     onDone();
   }
 
-  function restartLoopWithBlend() {
+  function restartLoop() {
     const video = videoRef.current;
     if (!video) {
       return;
@@ -56,6 +63,10 @@ export default function TransitionOverlay({ src, pinned, loop = false, onDone }:
 
   function startWhenReady() {
     setReady(true);
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackRate;
+    }
+
     if (pinned && !loop) {
       return;
     }
@@ -77,7 +88,7 @@ export default function TransitionOverlay({ src, pinned, loop = false, onDone }:
         muted={loop}
         preload="auto"
         onCanPlay={startWhenReady}
-        onEnded={loop ? restartLoopWithBlend : finish}
+        onEnded={loop ? restartLoop : finish}
       />
     </div>
   );

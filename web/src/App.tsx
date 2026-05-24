@@ -13,7 +13,10 @@ import styles from "./App.module.css";
 
 const LanguageKey = "SecondLaw.Web.Language";
 const SkipTransitionKey = "SecondLaw.Web.SkipGuildTransitions";
+const TransitionSpeedKey = "SecondLaw.Web.TransitionSpeed";
 const ProgressionKey = "SecondLaw.Web.Progression";
+const transitionSpeeds = [1, 2, 3, 4] as const;
+type TransitionSpeed = (typeof transitionSpeeds)[number];
 type TransitionTarget = Extract<GuildView, "counter" | "board" | "party">;
 type TransitionPhase = "playing" | "pinned";
 
@@ -31,6 +34,16 @@ function readLanguage(): Language {
 
 function readBoolean(key: string) {
   return localStorage.getItem(key) === "1";
+}
+
+function readTransitionSpeed(): TransitionSpeed {
+  const saved = Number(localStorage.getItem(TransitionSpeedKey));
+  return transitionSpeeds.includes(saved as TransitionSpeed) ? (saved as TransitionSpeed) : 2;
+}
+
+function nextTransitionSpeed(current: TransitionSpeed): TransitionSpeed {
+  const currentIndex = transitionSpeeds.indexOf(current);
+  return transitionSpeeds[(currentIndex + 1) % transitionSpeeds.length];
 }
 
 function readProgression() {
@@ -54,7 +67,7 @@ export default function App() {
   const [language, setLanguage] = useState<Language>(readLanguage);
   const [view, setView] = useState<GuildView>("hub");
   const [skipTransitions, setSkipTransitions] = useState(() => readBoolean(SkipTransitionKey));
-  const [debugHotspots, setDebugHotspots] = useState(false);
+  const [transitionSpeed, setTransitionSpeed] = useState<TransitionSpeed>(readTransitionSpeed);
   const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
   const [progression, setProgression] = useState<ProgressionState>(readProgression);
   const [rewardMessages, setRewardMessages] = useState<string[]>([]);
@@ -122,6 +135,14 @@ export default function App() {
     setSkipTransitions(next);
     localStorage.setItem(SkipTransitionKey, next ? "1" : "0");
     bridge.setSkipTransitions(next);
+  }
+
+  function cycleTransitionSpeed() {
+    setTransitionSpeed((current) => {
+      const next = nextTransitionSpeed(current);
+      localStorage.setItem(TransitionSpeedKey, String(next));
+      return next;
+    });
   }
 
   function openHotspot(hotspot: HotspotId) {
@@ -227,17 +248,16 @@ export default function App() {
           <GuildHub
             language={language}
             translate={translate}
-            debugHotspots={debugHotspots}
+            debugHotspots={false}
             onOpenHotspot={openHotspot}
           />
           <TopBar
-            language={language}
             translate={translate}
             skipTransitions={skipTransitions}
-            debugHotspots={debugHotspots}
+            transitionSpeedLabel={language === "zh" ? `${transitionSpeed}倍速` : `${transitionSpeed}x`}
             onToggleLanguage={toggleLanguage}
             onToggleSkipTransitions={toggleSkipTransitions}
-            onToggleDebugHotspots={() => setDebugHotspots((value) => !value)}
+            onCycleTransitionSpeed={cycleTransitionSpeed}
           />
         </>
       ) : null}
@@ -289,6 +309,7 @@ export default function App() {
           }
           pinned={transitionState.phase === "pinned"}
           loop={transitionState.phase === "pinned" && Boolean(transitionState.pinnedLoops)}
+          playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>
               current

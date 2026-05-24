@@ -1,23 +1,21 @@
-import type { Language } from "../types";
 import styles from "../App.module.css";
 
 interface TopBarProps {
-  language: Language;
   translate: (key: string) => string;
   skipTransitions: boolean;
-  debugHotspots: boolean;
+  transitionSpeedLabel: string;
   onToggleLanguage: () => void;
   onToggleSkipTransitions: () => void;
-  onToggleDebugHotspots: () => void;
+  onCycleTransitionSpeed: () => void;
 }
 
 export default function TopBar({
   translate,
   skipTransitions,
-  debugHotspots,
+  transitionSpeedLabel,
   onToggleLanguage,
   onToggleSkipTransitions,
-  onToggleDebugHotspots
+  onCycleTransitionSpeed
 }: TopBarProps) {
   return (
     <div className={styles.topBar}>
@@ -28,12 +26,8 @@ export default function TopBar({
         <input type="checkbox" checked={skipTransitions} onChange={onToggleSkipTransitions} />
         <span>{translate("guild.skip_transition")}</span>
       </label>
-      <button
-        className={[styles.toolButton, debugHotspots ? styles.toolButtonActive : ""].join(" ")}
-        type="button"
-        onClick={onToggleDebugHotspots}
-      >
-        {translate("guild.debug_hotspots")}
+      <button className={styles.toolButton} type="button" onClick={onCycleTransitionSpeed}>
+        {transitionSpeedLabel}
       </button>
     </div>
   );

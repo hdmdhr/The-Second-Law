@@ -11,6 +11,7 @@
 - Web prototype implements the guild hall, alpha-tested PNG hotspot hover/click, counter/bulletin/table transition videos, counter page, mock progression/rewards, client letter/reply choices, table-loop party options, and placeholder pages for board/shop.
 - Web guild polish pass moved the hub title toward the center, reduced hotspot highlight intensity to a light orange glow, constrained the counter UI to the right side, made panels more transparent, faded the counter UI in, and keeps the transition video final frame behind the counter page.
 - Web guild now includes `lobby-to-bulletin.mp4`, `lobby-to-table.mp4`, and `table-loop.mp4`; the request board and party table hotspots can play their own transitions, the finished transition frame stays pinned behind board/counter UI, and the party page overlays team options on the looping table background.
+- Web hub top bar now uses a transition-speed debug button instead of the hotspot debug toggle; it defaults to 2x and cycles 2x -> 3x -> 4x -> 1x for entry cutscenes while keeping pinned/looping backdrops at 1x.
 - Web/Unity bridge is stubbed in TypeScript with `startQuest`, `setLanguage`, `setSkipTransitions`, `unityReady`, and `battleFinished`; first pass uses a mock battle screen instead of a real Unity WebGL canvas.
 - Web build output is static and can be shared through GitHub Pages after adding a deployment workflow or manually publishing `web/dist`.
 - RPGUI is the chosen reference/library direction for the next Web guild styling pass; RPG CSS was rejected as too small/unproven for this project.
