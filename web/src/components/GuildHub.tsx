@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
 import { guildAssets, hotspots } from "../data/demoData";
 import type { HotspotDefinition, HotspotId, Language } from "../types";
 import styles from "../App.module.css";
@@ -119,15 +119,18 @@ export default function GuildHub({ language, translate, debugHotspots, onOpenHot
       <div className={styles.guildShade} />
       <div className={styles.hotspotMaskLayer} aria-hidden="true">
         {hotspots.map((hotspot) => (
-          <img
+          <span
             key={hotspot.id}
             className={[
               styles.hotspotMask,
               activeHotspot === hotspot.id ? styles.hotspotMaskActive : "",
               debugHotspots ? styles.hotspotMaskDebug : ""
             ].join(" ")}
-            src={hotspot.maskSrc}
-            alt=""
+            style={
+              {
+                "--hotspot-mask": `url("${hotspot.maskSrc}")`
+              } as CSSProperties
+            }
           />
         ))}
       </div>

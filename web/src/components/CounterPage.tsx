@@ -4,6 +4,7 @@ import styles from "../App.module.css";
 
 interface CounterPageProps {
   translate: (key: string) => string;
+  useVideoBackdrop: boolean;
   progression: ProgressionState;
   rewardMessages: string[];
   replyMessage: string;
@@ -21,6 +22,7 @@ interface CounterPageProps {
 
 export default function CounterPage({
   translate,
+  useVideoBackdrop,
   progression,
   rewardMessages,
   replyMessage,
@@ -38,8 +40,8 @@ export default function CounterPage({
   const hasLetter = rewardMessages.length > 0 || replyMessage.length > 0;
 
   return (
-    <main className={styles.pageShell}>
-      <div className={styles.pageBackdrop} />
+    <main className={[styles.pageShell, useVideoBackdrop ? styles.pageShellOverVideo : ""].join(" ")}>
+      {useVideoBackdrop ? null : <div className={styles.pageBackdrop} />}
       <section className={styles.pagePanelWide}>
         <header className={styles.pageHeader}>
           <button className={styles.backButton} type="button" onClick={onBack}>

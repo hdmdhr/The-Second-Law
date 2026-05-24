@@ -14,6 +14,7 @@ import styles from "./App.module.css";
 const LanguageKey = "SecondLaw.Web.Language";
 const SkipTransitionKey = "SecondLaw.Web.SkipGuildTransitions";
 const ProgressionKey = "SecondLaw.Web.Progression";
+type TransitionMode = "playing" | "pinned" | null;
 
 function readLanguage(): Language {
   return localStorage.getItem(LanguageKey) === "en" ? "en" : "zh";
@@ -45,7 +46,7 @@ export default function App() {
   const [view, setView] = useState<GuildView>("hub");
   const [skipTransitions, setSkipTransitions] = useState(() => readBoolean(SkipTransitionKey));
   const [debugHotspots, setDebugHotspots] = useState(false);
-  const [showTransition, setShowTransition] = useState(false);
+  const [transitionMode, setTransitionMode] = useState<TransitionMode>(null);
   const [progression, setProgression] = useState<ProgressionState>(readProgression);
   const [rewardMessages, setRewardMessages] = useState<string[]>([]);
   const [replyMessage, setReplyMessage] = useState("");
@@ -59,6 +60,7 @@ export default function App() {
     (result: BattleResult) => {
       if (!result.victory) {
         setRewardMessages([translate("battle.retreat")]);
+        setTransitionMode(null);
         setView("counter");
         return;
       }
@@ -91,6 +93,7 @@ export default function App() {
       setSelectedOpening("");
       setSelectedBody("");
       setSelectedClosing("");
+      setTransitionMode(null);
       setView("counter");
     },
     [translate]
@@ -115,19 +118,27 @@ export default function App() {
   function openHotspot(hotspot: HotspotId) {
     if (hotspot === "counter") {
       if (skipTransitions) {
+        setTransitionMode(null);
         setView("counter");
       } else {
-        setShowTransition(true);
+        setTransitionMode("playing");
       }
       return;
     }
 
+    setTransitionMode(null);
     setView(hotspot);
   }
 
   function startQuest() {
     bridge.startQuest(firstQuest.questId);
+    setTransitionMode(null);
     setView("battleMock");
+  }
+
+  function showHub() {
+    setTransitionMode(null);
+    setView("hub");
   }
 
   function resetProgression() {
@@ -182,6 +193,7 @@ export default function App() {
       {view === "counter" ? (
         <CounterPage
           translate={translate}
+          useVideoBackdrop={transitionMode === "pinned"}
           progression={progression}
           rewardMessages={rewardMessages}
           replyMessage={replyMessage}
@@ -194,12 +206,12 @@ export default function App() {
           onSendReply={sendReply}
           onStartQuest={startQuest}
           onReset={resetProgression}
-          onBack={() => setView("hub")}
+          onBack={showHub}
         />
       ) : null}
 
       {view === "board" || view === "party" || view === "shop" ? (
-        <PlaceholderPage view={view} translate={translate} onBack={() => setView("hub")} />
+        <PlaceholderPage view={view} translate={translate} onBack={showHub} />
       ) : null}
 
       {view === "battleMock" ? (
@@ -210,10 +222,11 @@ export default function App() {
         />
       ) : null}
 
-      {showTransition ? (
+      {transitionMode ? (
         <TransitionOverlay
+          pinned={transitionMode === "pinned"}
           onDone={() => {
-            setShowTransition(false);
+            setTransitionMode("pinned");
             setView("counter");
           }}
         />

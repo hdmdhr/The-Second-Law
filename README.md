@@ -27,6 +27,17 @@ Use Node `20.19+` for the Web project. The repo includes `web/.nvmrc`; in Codex,
 The real Unity WebGL canvas is not connected yet. The existing Unity UI Toolkit guild remains as an Editor/Play Mode fallback until the Web shell can enter and return from real Unity combat.
 The Web guild assets in `web/public/assets/guild/` are symlinks to the Unity `Assets/Resources` files, so images and video stay single-source during the prototype.
 
+## Sharing The Web Prototype
+
+The current Web prototype builds to static files, so it can be shared through GitHub Pages.
+
+```bash
+cd web
+npm run build
+```
+
+The output is `web/dist/`. A later deployment pass can add a GitHub Actions workflow that builds `web/` and publishes `web/dist` to Pages. Until the real Unity WebGL canvas is connected, this shared page will show the Web guild shell and mock battle flow only.
+
 ## Controls
 
 - The demo starts in Chinese. Use the `English` / `中文` button in the guild or battle HUD to switch languages.

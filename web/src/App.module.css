@@ -35,9 +35,13 @@
 
 .hubTitle {
   position: absolute;
-  left: clamp(18px, 4vw, 56px);
-  bottom: clamp(28px, 6vh, 72px);
-  max-width: min(620px, calc(100vw - 36px));
+  left: 50%;
+  top: 52%;
+  z-index: 8;
+  width: min(760px, calc(100vw - 48px));
+  max-width: min(760px, calc(100vw - 48px));
+  transform: translate(-50%, -50%);
+  text-align: center;
   text-shadow: 0 2px 12px rgb(0 0 0 / 0.55);
   pointer-events: none;
 }
@@ -129,21 +133,33 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background:
+    radial-gradient(circle, rgb(255 192 87 / 0.34), rgb(255 143 45 / 0.22));
+  -webkit-mask-image: var(--hotspot-mask);
+  mask-image: var(--hotspot-mask);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  mask-size: cover;
   opacity: 0;
-  filter: drop-shadow(0 0 10px rgb(255 170 72 / 0.8));
+  filter:
+    drop-shadow(0 0 2px rgb(255 218 126 / 0.84))
+    drop-shadow(0 0 8px rgb(255 151 36 / 0.62));
+  transition: opacity 90ms ease;
 }
 
 .hotspotMaskActive {
-  opacity: 0.44;
+  opacity: 0.46;
 }
 
 .hotspotMaskDebug {
-  opacity: 0.20;
+  opacity: 0.18;
 }
 
 .hotspotMaskDebug.hotspotMaskActive {
-  opacity: 0.58;
+  opacity: 0.50;
 }
 
 .hotspotLabel {
@@ -173,6 +189,12 @@
   position: fixed;
   inset: 0;
   z-index: 50;
+  background: transparent;
+  pointer-events: none;
+}
+
+.transitionOverlayPinned {
+  z-index: 0;
   background: #080706;
 }
 
@@ -180,15 +202,26 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.transitionVideoReady {
+  opacity: 1;
 }
 
 .pageShell,
 .battleMock {
   position: relative;
+  z-index: 1;
   min-height: 100vh;
   padding: 32px;
   background: #14100e;
   overflow: auto;
+}
+
+.pageShellOverVideo {
+  background: transparent;
 }
 
 .pageBackdrop {
@@ -207,13 +240,29 @@
   margin: 0 auto;
   border: 1px solid rgb(246 205 139 / 0.22);
   border-radius: 8px;
-  background: rgb(20 23 29 / 0.78);
+  background: rgb(20 23 29 / 0.58);
   box-shadow: 0 28px 80px rgb(0 0 0 / 0.34);
   backdrop-filter: blur(10px);
 }
 
 .pagePanelWide {
+  width: min(64vw, 940px);
+  margin-right: clamp(18px, 3vw, 48px);
+  margin-left: auto;
   padding: 22px;
+  animation: panelFadeIn 360ms ease-out both;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .pageHeader {
@@ -240,7 +289,7 @@
   border: 1px solid rgb(255 231 178 / 0.14);
   border-radius: 8px;
   padding: 18px;
-  background: rgb(11 14 20 / 0.52);
+  background: rgb(11 14 20 / 0.36);
 }
 
 .panel h2,
