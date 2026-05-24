@@ -1,8 +1,31 @@
-# Second Law Unity Demo
+# Second Law Demo
 
-Unity prototype for **《转生公会：第二法则》**.
+Unity and Web prototype for **《转生公会：第二法则》**.
 
 This repo is intentionally script-first: placeholder sprites, combat objects, the guild UI, quest flow, rewards, and the cached letter/reply loop are created at runtime. Open the folder with Unity `6000.4.7f1` or newer, press Play in any empty scene, and the demo bootstraps itself.
+
+## Web Guild Prototype
+
+The recommended first screen for the WebGL demo is now the React guild shell in `web/`.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open the Vite URL, usually `http://127.0.0.1:5173/`. The Web prototype currently includes:
+
+Use Node `20.19+` for the Web project. The repo includes `web/.nvmrc`; in Codex, the bundled Node 22 runtime can also run the build.
+
+- guild hall background and alpha-tested PNG hotspot masks
+- counter transition video with a skip-cutscene toggle saved in `localStorage`
+- counter page with quest, reward, progression, client letter, and reply choices
+- placeholder pages for the request board, party finder, and gear shop
+- mock Unity bridge flow: accept request -> mock battle -> victory/retreat -> return to guild
+
+The real Unity WebGL canvas is not connected yet. The existing Unity UI Toolkit guild remains as an Editor/Play Mode fallback until the Web shell can enter and return from real Unity combat.
+The Web guild assets in `web/public/assets/guild/` are symlinks to the Unity `Assets/Resources` files, so images and video stay single-source during the prototype.
 
 ## Controls
 
@@ -23,6 +46,7 @@ This repo is intentionally script-first: placeholder sprites, combat objects, th
 
 ## Implemented Scope
 
+- React/Vite Web guild prototype for the WebGL-first path
 - Single-player local demo
 - Uniform Valkyrie job from Lv1-Lv10, excluding the undefined `花容凶器`
 - One slime enemy species with close-range AI

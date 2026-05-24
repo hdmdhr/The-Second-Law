@@ -5,6 +5,8 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
+web/node_modules/
+web/dist/
 *.csproj
 *.sln
 *.user

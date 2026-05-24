@@ -1,0 +1,450 @@
+.app {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: #14100e;
+}
+
+.guildHub {
+  position: fixed;
+  inset: 0;
+  cursor: default;
+  overflow: hidden;
+}
+
+.guildBackground,
+.pageBackdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guildShade,
+.pageBackdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.24)),
+    radial-gradient(circle at 70% 28%, rgb(255 220 150 / 0.10), transparent 34%);
+  pointer-events: none;
+}
+
+.hubTitle {
+  position: absolute;
+  left: clamp(18px, 4vw, 56px);
+  bottom: clamp(28px, 6vh, 72px);
+  max-width: min(620px, calc(100vw - 36px));
+  text-shadow: 0 2px 12px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.hubTitle h1,
+.pageHeader h1,
+.placeholderPanel h1,
+.battlePanel h1 {
+  margin: 0;
+  color: #fff7e8;
+  font-size: clamp(28px, 4.4vw, 58px);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.hubTitle p,
+.pageHeader p,
+.placeholderPanel p,
+.battlePanel p {
+  margin: 10px 0 0;
+  color: #f1d5a4;
+  font-size: 16px;
+}
+
+.topBar {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(760px, calc(100vw - 28px));
+}
+
+.toolButton,
+.togglePill,
+.backButton,
+.primaryButton,
+.secondaryButton,
+.replyChoice {
+  min-height: 42px;
+  border: 1px solid rgb(255 218 150 / 0.34);
+  color: #fff3d8;
+  background: rgb(18 21 28 / 0.76);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.28);
+}
+
+.toolButton,
+.backButton,
+.primaryButton,
+.secondaryButton,
+.replyChoice {
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.toolButtonActive,
+.toolButton:hover,
+.backButton:hover,
+.secondaryButton:hover,
+.replyChoice:hover {
+  background: rgb(61 72 88 / 0.82);
+}
+
+.togglePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.togglePill input {
+  width: 16px;
+  height: 16px;
+}
+
+.hotspotMaskLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hotspotMask {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px rgb(255 170 72 / 0.8));
+}
+
+.hotspotMaskActive {
+  opacity: 0.44;
+}
+
+.hotspotMaskDebug {
+  opacity: 0.20;
+}
+
+.hotspotMaskDebug.hotspotMaskActive {
+  opacity: 0.58;
+}
+
+.hotspotLabel {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 12;
+  min-width: 180px;
+  transform: translateX(-50%) translateY(10px);
+  border: 1px solid rgb(255 220 160 / 0.42);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #fff7e8;
+  background: rgb(17 18 22 / 0.78);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.hotspotLabelVisible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.transitionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #080706;
+}
+
+.transitionVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pageShell,
+.battleMock {
+  position: relative;
+  min-height: 100vh;
+  padding: 32px;
+  background: #14100e;
+  overflow: auto;
+}
+
+.pageBackdrop {
+  position: fixed;
+  z-index: 0;
+  background-image: url("/assets/guild/demo-bg-0.png");
+  filter: saturate(0.8) brightness(0.48);
+}
+
+.pagePanelWide,
+.placeholderPanel,
+.battlePanel {
+  position: relative;
+  z-index: 1;
+  width: min(1160px, calc(100vw - 64px));
+  margin: 0 auto;
+  border: 1px solid rgb(246 205 139 / 0.22);
+  border-radius: 8px;
+  background: rgb(20 23 29 / 0.78);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 0.34);
+  backdrop-filter: blur(10px);
+}
+
+.pagePanelWide {
+  padding: 22px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.pageHeader h1,
+.placeholderPanel h1,
+.battlePanel h1 {
+  font-size: 34px;
+}
+
+.counterGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(260px, 0.75fr);
+  gap: 16px;
+}
+
+.panel {
+  min-width: 0;
+  border: 1px solid rgb(255 231 178 / 0.14);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgb(11 14 20 / 0.52);
+}
+
+.panel h2,
+.replyColumn h3 {
+  margin: 0 0 12px;
+  color: #ffe2a9;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+.panel p {
+  margin: 0 0 14px;
+  color: #f5e1c3;
+}
+
+.questFacts,
+.statusList {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.questFacts div,
+.statusList div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  padding: 7px 0;
+}
+
+.questFacts dt,
+.statusList dt {
+  color: #c8bca6;
+}
+
+.questFacts dd,
+.statusList dd {
+  margin: 0;
+  color: #fff4df;
+  text-align: right;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryButton {
+  border-color: rgb(255 199 92 / 0.62);
+  color: #25190c;
+  background: #ffc45d;
+  font-weight: 700;
+}
+
+.primaryButton:hover {
+  background: #ffd27a;
+}
+
+.secondaryButton {
+  background: rgb(37 48 59 / 0.74);
+}
+
+.rewardList {
+  margin: 14px 0 0;
+  padding-left: 20px;
+  color: #aaf0c4;
+}
+
+.letterPanel {
+  grid-column: 1 / -1;
+}
+
+.letterText {
+  min-height: 140px;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-line;
+}
+
+.sender {
+  color: #ffe2a9;
+  font-weight: 700;
+}
+
+.replyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 16px;
+}
+
+.replyColumn {
+  display: grid;
+  gap: 8px;
+}
+
+.replyChoice {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  color: #f9ead3;
+  text-align: left;
+}
+
+.replyChoiceSelected {
+  border-color: rgb(130 220 176 / 0.8);
+  background: rgb(44 91 74 / 0.72);
+}
+
+.placeholderPanel,
+.battlePanel {
+  max-width: 760px;
+  padding: 24px;
+}
+
+.placeholderCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.placeholderCards span {
+  min-height: 140px;
+  border: 1px solid rgb(255 255 255 / 0.10);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+}
+
+.battleMock {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 20%, rgb(113 135 158 / 0.24), transparent 30%),
+    #111417;
+}
+
+.mockArena {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  margin: 24px 0;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2a3238, #17191c 62%, #2c241c);
+}
+
+.mockHero,
+.mockSlime {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.mockHero {
+  left: 16%;
+  bottom: 42px;
+  background: #f1d18b;
+  color: #2a1a08;
+}
+
+.mockSlime {
+  right: 16%;
+  bottom: 46px;
+  background: #84c69b;
+  color: #102316;
+}
+
+@media (max-width: 820px) {
+  .pageShell,
+  .battleMock {
+    padding: 16px;
+  }
+
+  .pagePanelWide,
+  .placeholderPanel,
+  .battlePanel {
+    width: min(100%, calc(100vw - 32px));
+  }
+
+  .topBar {
+    left: 14px;
+    right: 14px;
+  }
+
+  .counterGrid,
+  .replyGrid,
+  .placeholderCards {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hubTitle h1 {
+    font-size: 34px;
+  }
+}
