@@ -13,6 +13,7 @@
 - Guild hall uses `Assets/Resources/Art/Guild/demo-bg-0.png` as the entry background.
 - Guild hall hotspots use same-size PNG masks in `Assets/Resources/Art/Guild/Hotspots/`; detection samples texture alpha so only non-transparent pixels are clickable.
 - Hotspot pointer sampling accounts for UI Toolkit screen coordinates and `ScaleAndCrop` background fitting, avoiding the earlier vertical flip and offset between hover/click areas and the painted PNG masks.
+- Hotspot overlay ignores UI Toolkit picking and the top bar is brought to the front, so guild language and skip-transition controls remain clickable.
 - Counter hotspot plays `Assets/Resources/Video/Guild/lobby-to-desk.mp4` at 1.5x speed before opening the counter page, unless cutscenes are skipped.
 - Counter transition now prepares the video first and waits for the first frame before hiding the guild UI, reducing the visible click-to-video flash.
 - Unity Video, Audio, and Animation built-in modules are enabled in `Packages/manifest.json` for the counter transition video and imported animation assets.

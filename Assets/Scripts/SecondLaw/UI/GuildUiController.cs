@@ -237,6 +237,8 @@ namespace SecondLaw
 
             VisualElement hotspotLayer = documentRoot.Q<VisualElement>("hotspot-layer");
             SetAbsoluteFill(hotspotLayer);
+            hotspotLayer.pickingMode = PickingMode.Ignore;
+            topBar.BringToFront();
             hotspots.Clear();
             ConfigureImageHotspot("counter-hotspot", "Art/Guild/Hotspots/counter-zone");
             ConfigureImageHotspot("board-hotspot", "Art/Guild/Hotspots/board-icon");
