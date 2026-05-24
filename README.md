@@ -29,14 +29,28 @@ The Web guild assets in `web/public/assets/guild/` are symlinks to the Unity `As
 
 ## Sharing The Web Prototype
 
-The current Web prototype builds to static files, so it can be shared through GitHub Pages.
+The current Web prototype builds to static files, so it can be shared through GitHub Pages. The repository includes `.github/workflows/deploy-web.yml`, which installs the Web dependencies, builds `web/`, and publishes `web/dist` to Pages.
 
 ```bash
 cd web
 npm run build
 ```
 
-The output is `web/dist/`. A later deployment pass can add a GitHub Actions workflow that builds `web/` and publishes `web/dist` to Pages. Until the real Unity WebGL canvas is connected, this shared page will show the Web guild shell and mock battle flow only.
+The output is `web/dist/`. For GitHub Pages project URLs, Vite must generate asset paths under the repository name, so this repository builds with `VITE_BASE_PATH=/The-Second-Law/`. The workflow derives that path from the GitHub repository name; local development still uses `/`.
+
+After pushing this branch, open the GitHub repository:
+
+1. Go to `Settings -> Pages`.
+2. Set `Build and deployment -> Source` to `GitHub Actions`.
+3. Open `Actions -> Deploy Web Guild to GitHub Pages` and run it manually, or push to `main` / `codex/web-guild-ui`.
+
+For this repository, the expected Pages URL is:
+
+```text
+https://hdmdhr.github.io/The-Second-Law/
+```
+
+Until the real Unity WebGL canvas is connected, this shared page will show the Web guild shell and mock battle flow only.
 
 ## Controls
 

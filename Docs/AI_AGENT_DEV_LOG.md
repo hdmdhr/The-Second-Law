@@ -13,7 +13,7 @@
 - Web guild now includes `lobby-to-bulletin.mp4`, `lobby-to-table.mp4`, and `table-loop.mp4`; the request board and party table hotspots can play their own transitions, the finished transition frame stays pinned behind board/counter UI, and the party page overlays team options on the looping table background.
 - Web hub top bar now uses a transition-speed debug button instead of the hotspot debug toggle; it defaults to 2x and cycles 2x -> 3x -> 4x -> 1x for entry cutscenes while keeping pinned/looping backdrops at 1x.
 - Web/Unity bridge is stubbed in TypeScript with `startQuest`, `setLanguage`, `setSkipTransitions`, `unityReady`, and `battleFinished`; first pass uses a mock battle screen instead of a real Unity WebGL canvas.
-- Web build output is static and can be shared through GitHub Pages after adding a deployment workflow or manually publishing `web/dist`.
+- Web build output is static and can be shared through GitHub Pages; `.github/workflows/deploy-web.yml` builds `web/` on Node 22, sets the Vite base path from the repository name, and publishes `web/dist` as the Pages artifact. Web public asset URLs use `import.meta.env.BASE_URL` so symlinked guild PNG/MP4 files resolve under the Pages project path.
 - RPGUI is the chosen reference/library direction for the next Web guild styling pass; RPG CSS was rejected as too small/unproven for this project.
 - Unity UI Toolkit guild remains available as the fallback path until the Web shell connects to real Unity WebGL combat.
 - Job scope is Uniform Valkyrie Lv1-Lv10; undefined `花容凶器` is intentionally excluded.
@@ -50,6 +50,7 @@
 - `Assets/Scripts/SecondLaw/Data/DemoData.cs`: hard-coded demo stats, quest, letter, and skill definitions.
 - `Assets/Scripts/SecondLaw/Core/LocalizationService.cs`: Chinese/English runtime text table.
 - `web/`: React/Vite Web guild prototype with mock data, local state, PNG hotspot sampling, and a stub Unity bridge.
+- `.github/workflows/deploy-web.yml`: GitHub Actions workflow for building the Web guild prototype and deploying `web/dist` to GitHub Pages.
 - `Assets/Scripts/SecondLaw/UI/GuildUiController.cs`: UI Toolkit guild hall entry, hotspots, counter page, transition video, quest, reward, letter/reply.
 - `Assets/Resources/UI/Guild/GuildHub.uxml`: UI Toolkit guild hall and counter page structure.
 - `Assets/Resources/UI/Guild/GuildHub.uss`: UI Toolkit layout, hotspot, and panel styling.

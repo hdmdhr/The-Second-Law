@@ -1,33 +1,37 @@
 import type { HotspotDefinition, LetterTemplate, ProgressionState, QuestDefinition } from "../types";
 
+function publicAsset(path: string) {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
+}
+
 export const guildAssets = {
-  background: "/assets/guild/demo-bg-0.png",
-  counterVideo: "/assets/guild/video/lobby-to-desk.mp4",
-  boardVideo: "/assets/guild/video/lobby-to-bulletin.mp4",
-  tableVideo: "/assets/guild/video/lobby-to-table.mp4",
-  tableLoopVideo: "/assets/guild/video/table-loop.mp4"
+  background: publicAsset("/assets/guild/demo-bg-0.png"),
+  counterVideo: publicAsset("/assets/guild/video/lobby-to-desk.mp4"),
+  boardVideo: publicAsset("/assets/guild/video/lobby-to-bulletin.mp4"),
+  tableVideo: publicAsset("/assets/guild/video/lobby-to-table.mp4"),
+  tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4")
 } as const;
 
 export const hotspots: HotspotDefinition[] = [
   {
     id: "counter",
     labelKey: "guild.hotspot.counter",
-    maskSrc: "/assets/guild/hotspots/counter-zone.png"
+    maskSrc: publicAsset("/assets/guild/hotspots/counter-zone.png")
   },
   {
     id: "board",
     labelKey: "guild.hotspot.board",
-    maskSrc: "/assets/guild/hotspots/board-icon.png"
+    maskSrc: publicAsset("/assets/guild/hotspots/board-icon.png")
   },
   {
     id: "party",
     labelKey: "guild.hotspot.table",
-    maskSrc: "/assets/guild/hotspots/table-zone.png"
+    maskSrc: publicAsset("/assets/guild/hotspots/table-zone.png")
   },
   {
     id: "shop",
     labelKey: "guild.hotspot.shop",
-    maskSrc: "/assets/guild/hotspots/equipment-zone.png"
+    maskSrc: publicAsset("/assets/guild/hotspots/equipment-zone.png")
   }
 ];
 
