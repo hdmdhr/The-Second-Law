@@ -408,6 +408,18 @@
   padding: 24px;
 }
 
+.partyPageShell {
+  display: grid;
+  place-items: center;
+}
+
+.partyPanel {
+  max-width: min(720px, calc(100vw - 48px));
+  margin: 0 auto;
+  background: rgb(19 22 27 / 0.48);
+  animation: panelFadeIn 360ms ease-out both;
+}
+
 .placeholderCards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -420,6 +432,45 @@
   border: 1px solid rgb(255 255 255 / 0.10);
   border-radius: 8px;
   background: linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+}
+
+.partyOptions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.partyOption {
+  min-height: 148px;
+  border: 1px solid rgb(255 218 150 / 0.32);
+  border-radius: 8px;
+  padding: 16px;
+  color: #fff2d5;
+  background: rgb(14 17 22 / 0.42);
+  text-align: left;
+  cursor: pointer;
+}
+
+.partyOption:hover {
+  border-color: rgb(255 196 94 / 0.78);
+  background: rgb(47 39 30 / 0.58);
+}
+
+.partyOption strong,
+.partyOption span {
+  display: block;
+}
+
+.partyOption strong {
+  margin-bottom: 10px;
+  color: #ffe0a6;
+  font-size: 18px;
+}
+
+.partyOption span {
+  color: #ead8bd;
+  font-size: 14px;
 }
 
 .battleMock {
@@ -484,7 +535,8 @@
 
   .counterGrid,
   .replyGrid,
-  .placeholderCards {
+  .placeholderCards,
+  .partyOptions {
     grid-template-columns: 1fr;
   }
 

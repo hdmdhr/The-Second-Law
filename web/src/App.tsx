@@ -6,7 +6,7 @@ import MockBattle from "./components/MockBattle";
 import PlaceholderPage from "./components/PlaceholderPage";
 import TopBar from "./components/TopBar";
 import TransitionOverlay from "./components/TransitionOverlay";
-import { experienceForNextLevel, firstQuest, initialProgression, slimeLetter } from "./data/demoData";
+import { experienceForNextLevel, firstQuest, guildAssets, initialProgression, slimeLetter } from "./data/demoData";
 import { t } from "./data/i18n";
 import type { BattleResult, GuildView, HotspotId, Language, ProgressionState } from "./types";
 import styles from "./App.module.css";
@@ -14,7 +14,16 @@ import styles from "./App.module.css";
 const LanguageKey = "SecondLaw.Web.Language";
 const SkipTransitionKey = "SecondLaw.Web.SkipGuildTransitions";
 const ProgressionKey = "SecondLaw.Web.Progression";
-type TransitionMode = "playing" | "pinned" | null;
+type TransitionTarget = Extract<GuildView, "counter" | "board" | "party">;
+type TransitionPhase = "playing" | "pinned";
+
+interface TransitionState {
+  target: TransitionTarget;
+  phase: TransitionPhase;
+  videoSrc: string;
+  pinnedVideoSrc?: string;
+  pinnedLoops?: boolean;
+}
 
 function readLanguage(): Language {
   return localStorage.getItem(LanguageKey) === "en" ? "en" : "zh";
@@ -46,7 +55,7 @@ export default function App() {
   const [view, setView] = useState<GuildView>("hub");
   const [skipTransitions, setSkipTransitions] = useState(() => readBoolean(SkipTransitionKey));
   const [debugHotspots, setDebugHotspots] = useState(false);
-  const [transitionMode, setTransitionMode] = useState<TransitionMode>(null);
+  const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
   const [progression, setProgression] = useState<ProgressionState>(readProgression);
   const [rewardMessages, setRewardMessages] = useState<string[]>([]);
   const [replyMessage, setReplyMessage] = useState("");
@@ -60,7 +69,7 @@ export default function App() {
     (result: BattleResult) => {
       if (!result.victory) {
         setRewardMessages([translate("battle.retreat")]);
-        setTransitionMode(null);
+        setTransitionState(null);
         setView("counter");
         return;
       }
@@ -93,7 +102,7 @@ export default function App() {
       setSelectedOpening("");
       setSelectedBody("");
       setSelectedClosing("");
-      setTransitionMode(null);
+      setTransitionState(null);
       setView("counter");
     },
     [translate]
@@ -116,28 +125,71 @@ export default function App() {
   }
 
   function openHotspot(hotspot: HotspotId) {
-    if (hotspot === "counter") {
-      if (skipTransitions) {
-        setTransitionMode(null);
-        setView("counter");
-      } else {
-        setTransitionMode("playing");
-      }
+    const transition = transitionForHotspot(hotspot);
+    if (transition) {
+      openWithTransition(transition);
       return;
     }
 
-    setTransitionMode(null);
+    setTransitionState(null);
     setView(hotspot);
+  }
+
+  function transitionForHotspot(hotspot: HotspotId): TransitionState | null {
+    if (hotspot === "counter") {
+      return {
+        target: "counter",
+        phase: "playing",
+        videoSrc: guildAssets.counterVideo
+      };
+    }
+
+    if (hotspot === "board") {
+      return {
+        target: "board",
+        phase: "playing",
+        videoSrc: guildAssets.boardVideo
+      };
+    }
+
+    if (hotspot === "party") {
+      return {
+        target: "party",
+        phase: "playing",
+        videoSrc: guildAssets.tableVideo,
+        pinnedVideoSrc: guildAssets.tableLoopVideo,
+        pinnedLoops: true
+      };
+    }
+
+    return null;
+  }
+
+  function openWithTransition(next: TransitionState) {
+    if (skipTransitions) {
+      setTransitionState(
+        next.pinnedVideoSrc
+          ? {
+              ...next,
+              phase: "pinned"
+            }
+          : null
+      );
+      setView(next.target);
+      return;
+    }
+
+    setTransitionState(next);
   }
 
   function startQuest() {
     bridge.startQuest(firstQuest.questId);
-    setTransitionMode(null);
+    setTransitionState(null);
     setView("battleMock");
   }
 
   function showHub() {
-    setTransitionMode(null);
+    setTransitionState(null);
     setView("hub");
   }
 
@@ -193,7 +245,7 @@ export default function App() {
       {view === "counter" ? (
         <CounterPage
           translate={translate}
-          useVideoBackdrop={transitionMode === "pinned"}
+          useVideoBackdrop={transitionState?.phase === "pinned" && transitionState.target === "counter"}
           progression={progression}
           rewardMessages={rewardMessages}
           replyMessage={replyMessage}
@@ -211,7 +263,12 @@ export default function App() {
       ) : null}
 
       {view === "board" || view === "party" || view === "shop" ? (
-        <PlaceholderPage view={view} translate={translate} onBack={showHub} />
+        <PlaceholderPage
+          view={view}
+          translate={translate}
+          useVideoBackdrop={transitionState?.phase === "pinned" && transitionState.target === view}
+          onBack={showHub}
+        />
       ) : null}
 
       {view === "battleMock" ? (
@@ -222,12 +279,26 @@ export default function App() {
         />
       ) : null}
 
-      {transitionMode ? (
+      {transitionState ? (
         <TransitionOverlay
-          pinned={transitionMode === "pinned"}
+          key={transitionState.target}
+          src={
+            transitionState.phase === "pinned" && transitionState.pinnedVideoSrc
+              ? transitionState.pinnedVideoSrc
+              : transitionState.videoSrc
+          }
+          pinned={transitionState.phase === "pinned"}
+          loop={transitionState.phase === "pinned" && Boolean(transitionState.pinnedLoops)}
           onDone={() => {
-            setTransitionMode("pinned");
-            setView("counter");
+            setTransitionState((current) =>
+              current
+                ? {
+                    ...current,
+                    phase: "pinned"
+                  }
+                : current
+            );
+            setView(transitionState.target);
           }}
         />
       ) : null}

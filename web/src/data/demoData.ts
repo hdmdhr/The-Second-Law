@@ -2,7 +2,10 @@ import type { HotspotDefinition, LetterTemplate, ProgressionState, QuestDefiniti
 
 export const guildAssets = {
   background: "/assets/guild/demo-bg-0.png",
-  counterVideo: "/assets/guild/video/lobby-to-desk.mp4"
+  counterVideo: "/assets/guild/video/lobby-to-desk.mp4",
+  boardVideo: "/assets/guild/video/lobby-to-bulletin.mp4",
+  tableVideo: "/assets/guild/video/lobby-to-table.mp4",
+  tableLoopVideo: "/assets/guild/video/table-loop.mp4"
 } as const;
 
 export const hotspots: HotspotDefinition[] = [
