@@ -6,7 +6,7 @@ function publicAsset(path: string) {
 
 export const guildAssets = {
   background: publicAsset("/assets/guild/demo-bg-0.png"),
-  counterVideo: publicAsset("/assets/guild/video/lobby-to-desk.mp4"),
+  counterVideo: publicAsset("/assets/guild/video/lobby-to-counter.mp4"),
   boardVideo: publicAsset("/assets/guild/video/lobby-to-bulletin.mp4"),
   tableVideo: publicAsset("/assets/guild/video/lobby-to-table.mp4"),
   tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4")

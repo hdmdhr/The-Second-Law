@@ -25,7 +25,7 @@
 - Guild hall hotspots use same-size PNG masks in `Assets/Resources/Art/Guild/Hotspots/`; detection samples texture alpha so only non-transparent pixels are clickable.
 - Hotspot pointer sampling accounts for UI Toolkit screen coordinates and `ScaleAndCrop` background fitting, avoiding the earlier vertical flip and offset between hover/click areas and the painted PNG masks.
 - Hotspot overlay ignores UI Toolkit picking and the top bar is brought to the front, so guild language and skip-transition controls remain clickable.
-- Counter hotspot plays `Assets/Resources/Video/Guild/lobby-to-desk.mp4` at 1.5x speed before opening the counter page, unless cutscenes are skipped.
+- Counter hotspot plays `Assets/Resources/Video/Guild/lobby-to-counter.mp4` at 1.5x speed before opening the counter page, unless cutscenes are skipped.
 - Counter transition now prepares the video first and waits for the first frame before hiding the guild UI, reducing the visible click-to-video flash.
 - Unity Video, Audio, and Animation built-in modules are enabled in `Packages/manifest.json` for the counter transition video and imported animation assets.
 - `Assets/Resources/UI/Guild/UnityDefaultRuntimeTheme.tss` supplies the runtime UI Toolkit default theme.
@@ -57,7 +57,7 @@
 - `Assets/Resources/UI/Guild/GuildHub.uss`: UI Toolkit layout, hotspot, and panel styling.
 - `Assets/Resources/Art/Guild/Hotspots/`: same-size PNG hotspot masks for the counter, request board, party table, and equipment/shop regions.
 - `Assets/Resources/UI/Guild/UnityDefaultRuntimeTheme.tss`: runtime UI Toolkit theme import.
-- `Assets/Resources/Video/Guild/lobby-to-desk.mp4`: current counter transition video.
+- `Assets/Resources/Video/Guild/lobby-to-counter.mp4`: current counter transition video.
 - `Assets/Resources/Video/Guild/lobby-to-bulletin.mp4`, `lobby-to-table.mp4`, `table-loop.mp4`: Web guild bulletin/table transition and table loop videos.
 - `Assets/FantasyMonsters/Common/Animations/Boar/`: imported Boar animation controller and clips from the Fantasy Monsters package.
 - `Packages/manifest.json`: enables Unity Video/Audio/Animation modules for runtime video playback and imported animation assets.

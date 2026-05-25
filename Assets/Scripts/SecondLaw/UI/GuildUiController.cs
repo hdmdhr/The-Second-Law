@@ -118,7 +118,7 @@ namespace SecondLaw
                 documentRoot.styleSheets.Add(styleSheet);
             }
 
-            counterTransitionClip = Resources.Load<VideoClip>("Video/Guild/lobby-to-desk");
+            counterTransitionClip = Resources.Load<VideoClip>("Video/Guild/lobby-to-counter");
             BindElements();
             ApplyBackgrounds();
             ApplyInlineLayout();
