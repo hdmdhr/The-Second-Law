@@ -4,8 +4,11 @@ import styles from "../App.module.css";
 interface TransitionOverlayProps {
   src: string;
   pinned: boolean;
-  loop?: boolean;
-  muted?: boolean;
+  postrollSrc?: string;
+  postrollLoop?: boolean;
+  postrollMuted?: boolean;
+  postrollAudioFadeOutSeconds?: number;
+  startWithPostroll?: boolean;
   audioFadeOutSeconds?: number;
   playbackRate?: number;
   onDone: () => void;
@@ -14,43 +17,90 @@ interface TransitionOverlayProps {
 export default function TransitionOverlay({
   src,
   pinned,
-  loop = false,
-  muted = false,
+  postrollSrc,
+  postrollLoop = false,
+  postrollMuted = false,
+  postrollAudioFadeOutSeconds,
+  startWithPostroll = false,
   audioFadeOutSeconds,
   playbackRate = 1,
   onDone
 }: TransitionOverlayProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const primaryVideoRef = useRef<HTMLVideoElement>(null);
+  const postrollVideoRef = useRef<HTMLVideoElement>(null);
   const finishedRef = useRef(false);
-  const [ready, setReady] = useState(false);
+  const postrollPendingRef = useRef(false);
+  const postrollStartedRef = useRef(false);
+  const [primaryReady, setPrimaryReady] = useState(false);
+  const [postrollReady, setPostrollReady] = useState(false);
+  const [postrollActive, setPostrollActive] = useState(false);
+
+  const postrollLeadInSeconds = 0.8;
 
   useEffect(() => {
-    if (pinned || loop) {
+    if (pinned || postrollActive) {
       return;
     }
 
     const timeout = window.setTimeout(() => {
       if (!finishedRef.current) {
-        finishedRef.current = true;
-        onDone();
+        activatePostroll();
       }
     }, 12000);
 
     return () => window.clearTimeout(timeout);
-  }, [loop, onDone, pinned]);
+  }, [pinned, postrollActive, postrollReady, postrollSrc]);
 
   useEffect(() => {
-    setReady(false);
+    setPrimaryReady(false);
+    setPostrollReady(false);
+    setPostrollActive(false);
+    postrollPendingRef.current = false;
+    postrollStartedRef.current = false;
     finishedRef.current = false;
-  }, [src]);
+  }, [postrollSrc, src]);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = playbackRate;
-      videoRef.current.muted = muted;
-      videoRef.current.volume = 1;
+    if (!startWithPostroll || !postrollSrc) {
+      return;
     }
-  }, [muted, playbackRate, src]);
+
+    if (postrollStartedRef.current) {
+      setPostrollActive(true);
+      ensurePostrollPlaying();
+      return;
+    }
+
+    if (postrollActive) {
+      return;
+    }
+
+    const video = postrollVideoRef.current;
+    if (!video || !isVideoReady(video)) {
+      postrollPendingRef.current = true;
+      video?.load();
+      return;
+    }
+
+    postrollPendingRef.current = false;
+    startPostrollVideo(video);
+  }, [postrollActive, postrollReady, postrollSrc, startWithPostroll]);
+
+  useEffect(() => {
+    if (!pinned || !postrollSrc || !postrollStartedRef.current) {
+      return;
+    }
+
+    setPostrollActive(true);
+    ensurePostrollPlaying();
+  }, [pinned, postrollSrc]);
+
+  useEffect(() => {
+    if (primaryVideoRef.current) {
+      primaryVideoRef.current.playbackRate = playbackRate;
+      primaryVideoRef.current.volume = 1;
+    }
+  }, [playbackRate, src]);
 
   function finish() {
     if (finishedRef.current) {
@@ -61,66 +111,206 @@ export default function TransitionOverlay({
     onDone();
   }
 
-  function restartLoop() {
-    const video = videoRef.current;
+  function activatePostroll() {
+    if (!postrollSrc) {
+      finish();
+      return;
+    }
+
+    if (postrollStartedRef.current) {
+      setPostrollActive(true);
+      if (!finishedRef.current) {
+        finish();
+      }
+      return;
+    }
+
+    const video = postrollVideoRef.current;
+    if (!video || !isVideoReady(video)) {
+      postrollPendingRef.current = true;
+      video?.load();
+      return;
+    }
+
+    startPostrollVideo(video);
+    finish();
+  }
+
+  function startPostrollVideo(video: HTMLVideoElement, restart = false) {
+    if (postrollStartedRef.current && !restart) {
+      ensurePostrollPlaying();
+      return;
+    }
+
+    postrollStartedRef.current = true;
+    setPostrollActive(true);
+    video.currentTime = 0;
+    video.volume = 1;
+    video.muted = Boolean(postrollMuted);
+    video.playbackRate = postrollLoop ? randomLoopPlaybackRate() : 1;
+    playVideo(video, "Loop playback");
+  }
+
+  function ensurePostrollPlaying() {
+    const video = postrollVideoRef.current;
+    if (!video || !postrollStartedRef.current) {
+      return;
+    }
+
+    if (video.paused || video.ended) {
+      playVideo(video, "Loop playback");
+    }
+  }
+
+  function restartPostrollLoop() {
+    const video = postrollVideoRef.current;
     if (!video) {
       return;
     }
 
-    video.currentTime = 0;
-    video.volume = 1;
-    void video.play().catch((error) => {
-      console.warn("[SecondLaw] Loop playback was blocked.", error);
-    });
+    startPostrollVideo(video, true);
   }
 
-  function updateLoopAudioFade() {
-    const video = videoRef.current;
-    if (!video || muted || !loop || !audioFadeOutSeconds || !Number.isFinite(video.duration) || video.duration <= 0) {
+  function updateAudioFade(video: HTMLVideoElement | null, muted: boolean, fadeOutSeconds?: number) {
+    if (!video || muted || video.muted || !fadeOutSeconds || !Number.isFinite(video.duration) || video.duration <= 0) {
       return;
     }
 
     const remaining = video.duration - video.currentTime;
-    if (remaining <= audioFadeOutSeconds) {
-      video.volume = Math.max(0, remaining / audioFadeOutSeconds);
+    if (remaining <= fadeOutSeconds) {
+      video.volume = Math.max(0, remaining / fadeOutSeconds);
       return;
     }
 
     video.volume = 1;
   }
 
-  function startWhenReady() {
-    setReady(true);
-    if (videoRef.current) {
-      videoRef.current.playbackRate = playbackRate;
-      videoRef.current.muted = muted;
-      videoRef.current.volume = 1;
+  function startPrimaryWhenReady() {
+    setPrimaryReady(true);
+    if (primaryVideoRef.current) {
+      primaryVideoRef.current.playbackRate = playbackRate;
+      primaryVideoRef.current.volume = 1;
     }
 
-    if (pinned && !loop) {
+    if (pinned || postrollActive) {
       return;
     }
 
-    void videoRef.current?.play().catch((error) => {
-      console.warn("[SecondLaw] Counter transition playback was blocked.", error);
+    const video = primaryVideoRef.current;
+    if (video) {
+      playVideo(video, "Transition playback");
+    }
+  }
+
+  function preparePostrollWhenReady() {
+    setPostrollReady(true);
+    const video = postrollVideoRef.current;
+    if (!video) {
+      return;
+    }
+
+    video.muted = Boolean(postrollMuted);
+    video.volume = 1;
+
+    if (postrollStartedRef.current) {
+      ensurePostrollPlaying();
+      return;
+    }
+
+    if (!startWithPostroll && !postrollPendingRef.current) {
+      return;
+    }
+
+    postrollPendingRef.current = false;
+    startPostrollVideo(video);
+    if (!startWithPostroll) {
+      finish();
+    }
+  }
+
+  function maybeActivatePostrollEarly() {
+    if (postrollStartedRef.current || finishedRef.current || !postrollSrc || pinned) {
+      return;
+    }
+
+    const video = primaryVideoRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
+      return;
+    }
+
+    const remaining = video.duration - video.currentTime;
+    if (remaining > postrollLeadInSeconds) {
+      return;
+    }
+
+    activatePostroll();
+  }
+
+  function playVideo(video: HTMLVideoElement, context: string) {
+    void video.play().catch((error) => {
+      if (video.muted) {
+        console.warn(`[SecondLaw] ${context} was blocked.`, error);
+        return;
+      }
+
+      video.muted = true;
+      void video.play().catch((mutedError) => {
+        console.warn(`[SecondLaw] ${context} was blocked even after muting.`, mutedError);
+      });
     });
+  }
+
+  function randomLoopPlaybackRate() {
+    return 0.7 + Math.random() * 0.6;
+  }
+
+  function isVideoReady(video: HTMLVideoElement) {
+    return video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA;
   }
 
   return (
     <div className={[styles.transitionOverlay, pinned ? styles.transitionOverlayPinned : ""].join(" ")}>
       <video
-        ref={videoRef}
-        className={[styles.transitionVideo, ready || pinned ? styles.transitionVideoReady : ""].join(" ")}
+        ref={primaryVideoRef}
+        className={[
+          styles.transitionVideo,
+          primaryReady && !postrollActive ? styles.transitionVideoReady : ""
+        ].join(" ")}
         src={src}
         autoPlay
         playsInline
         loop={false}
-        muted={muted}
         preload="auto"
-        onCanPlay={startWhenReady}
-        onEnded={loop ? restartLoop : finish}
-        onTimeUpdate={updateLoopAudioFade}
+        onCanPlay={startPrimaryWhenReady}
+        onEnded={() => {
+          if (!postrollStartedRef.current) {
+            activatePostroll();
+          }
+        }}
+        onTimeUpdate={() => {
+          updateAudioFade(primaryVideoRef.current, false, audioFadeOutSeconds);
+          maybeActivatePostrollEarly();
+        }}
       />
+      {postrollSrc ? (
+        <video
+          ref={postrollVideoRef}
+          className={[
+            styles.transitionVideo,
+            postrollActive ? styles.transitionVideoReady : ""
+          ].join(" ")}
+          src={postrollSrc}
+          playsInline
+          loop={false}
+          muted={postrollMuted}
+          preload="auto"
+          onCanPlay={preparePostrollWhenReady}
+          onEnded={postrollLoop ? restartPostrollLoop : undefined}
+          onTimeUpdate={() =>
+            updateAudioFade(postrollVideoRef.current, Boolean(postrollMuted), postrollAudioFadeOutSeconds)
+          }
+        />
+      ) : null}
     </div>
   );
 }

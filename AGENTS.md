@@ -35,11 +35,14 @@ Favor small, testable improvements over large rewrites. The user is learning Uni
 
 ## Documentation Rule
 
-Before every code/resource commit:
+Do not update docs for every small code/resource edit. Use the `doc-commit` skill when the user explicitly invokes it, or when the user explicitly asks for a commit and the pending change materially affects behavior, resources, workflow, architecture, build/deploy, or agent guidance.
+
+When doc updates are needed before a commit:
 
 1. Update `Docs/AI_AGENT_DEV_LOG.md` with the short status change, important files, and known gaps.
 2. Update the Notion beginner architecture doc when behavior, controls, file responsibilities, assets, or workflow change.
-3. Mention the doc updates in the final response.
+3. Update README only when commands, user-facing scope, or sharing/deploy instructions change.
+4. Mention the doc updates in the final response.
 
 If a change is exploratory and will not be committed, do not update Notion unless the user asks.
 

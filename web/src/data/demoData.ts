@@ -9,6 +9,7 @@ export const guildAssets = {
   counterVideo: publicAsset("/assets/guild/video/lobby-to-counter.mp4"),
   counterLoopVideo: publicAsset("/assets/guild/video/counter-loop.mp4"),
   boardVideo: publicAsset("/assets/guild/video/lobby-to-bulletin.mp4"),
+  boardLoopVideo: publicAsset("/assets/guild/video/bulletin-loop.mp4"),
   tableVideo: publicAsset("/assets/guild/video/lobby-to-table.mp4"),
   tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4")
 } as const;

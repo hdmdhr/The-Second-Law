@@ -8,9 +8,9 @@
 - Current playable loop: guild UI -> accept slime quest -> battle -> rewards/level progress -> cached client letter -> choice-based reply.
 - Web guild prototype branch is active: `web/` contains a React + Vite + TypeScript + CSS Modules shell for the WebGL-first guild experience.
 - Web guild assets in `web/public/assets/guild/` are symlinks to Unity Resources art/video files, avoiding duplicate large PNG/MP4 files while keeping browser-friendly URLs.
-- Web prototype implements the guild hall, alpha-tested PNG hotspot hover/click, counter/bulletin/table transition videos, counter page, mock progression/rewards, client letter/reply choices, counter/table looping backdrops, table-loop party options, and placeholder pages for board/shop.
+- Web prototype implements the guild hall, alpha-tested PNG hotspot hover/click, counter/bulletin/table transition videos, counter page, mock progression/rewards, client letter/reply choices, counter/bulletin/table looping backdrops, table-loop party options, and placeholder pages for board/shop.
 - Web guild polish pass moved the hub title toward the center, reduced hotspot highlight intensity to a light orange glow, constrained the counter UI to the right side, made panels more transparent, faded the counter UI in, and keeps the transition video final frame behind the counter page.
-- Web guild now includes `lobby-to-counter.mp4`, `counter-loop.mp4`, `lobby-to-bulletin.mp4`, `lobby-to-table.mp4`, and `table-loop.mp4`; the counter transition hands off to the counter loop with the final two seconds of each loop faded out, the request board and party table hotspots can play their own transitions, and the party page overlays team options on the looping table background.
+- Web guild now includes `lobby-to-counter.mp4`, `counter-loop.mp4`, `lobby-to-bulletin.mp4`, `bulletin-loop.mp4`, `lobby-to-table.mp4`, and `table-loop.mp4`; `TransitionOverlay` uses a two-video handoff, starts the post-transition loop shortly before the entry cutscene ends, and guards loop startup with refs so media readiness events cannot repeatedly reset `currentTime` to 0. Counter and bulletin entry/loop audio fade out over the final two seconds, and all loop backdrops randomize each loop speed between 0.7x and 1.3x.
 - Web hub top bar now uses a transition-speed debug button instead of the hotspot debug toggle; it defaults to 2x and cycles 2x -> 3x -> 4x -> 1x for entry cutscenes while keeping pinned/looping backdrops at 1x.
 - Web/Unity bridge is stubbed in TypeScript with `startQuest`, `setLanguage`, `setSkipTransitions`, `unityReady`, and `battleFinished`; first pass uses a mock battle screen instead of a real Unity WebGL canvas.
 - Web build output is static and can be shared through GitHub Pages; `.github/workflows/deploy-web.yml` builds `web/` on Node 22, sets the Vite base path from the repository name, and publishes `web/dist` as the Pages artifact. Web public asset URLs use `import.meta.env.BASE_URL` so symlinked guild PNG/MP4 files resolve under the Pages project path.
@@ -32,6 +32,7 @@
 - Player/enemy visuals now use PNG spritesheets from Tiny RPG Character Asset Pack: Soldier for player, Orc for enemy placeholder.
 - A small Boar animation subset from Fantasy Monsters is imported under `Assets/FantasyMonsters/Common/Animations/Boar/` for future enemy replacement experiments.
 - `AGENTS.md` is the project guide for future coding agents.
+- `doc-commit` skill controls documentation-before-commit work: update docs only when explicitly invoked or when an explicitly requested commit has important behavior/resource/workflow impact.
 - New Notion Web documentation lives under the RPG Second Law page:
   - Web architecture learning guide: https://www.notion.so/36a4dfd23cc28183b976da83114225ca
   - Web guild UI implementation spec: https://www.notion.so/36a4dfd23cc2815992c3d36aef883f0c
@@ -58,7 +59,7 @@
 - `Assets/Resources/Art/Guild/Hotspots/`: same-size PNG hotspot masks for the counter, request board, party table, and equipment/shop regions.
 - `Assets/Resources/UI/Guild/UnityDefaultRuntimeTheme.tss`: runtime UI Toolkit theme import.
 - `Assets/Resources/Video/Guild/lobby-to-counter.mp4`, `counter-loop.mp4`: current counter transition and looping counter backdrop videos.
-- `Assets/Resources/Video/Guild/lobby-to-bulletin.mp4`, `lobby-to-table.mp4`, `table-loop.mp4`: Web guild bulletin/table transition and table loop videos.
+- `Assets/Resources/Video/Guild/lobby-to-bulletin.mp4`, `bulletin-loop.mp4`, `lobby-to-table.mp4`, `table-loop.mp4`: Web guild bulletin/table transition and loop videos.
 - `Assets/FantasyMonsters/Common/Animations/Boar/`: imported Boar animation controller and clips from the Fantasy Monsters package.
 - `Packages/manifest.json`: enables Unity Video/Audio/Animation modules for runtime video playback and imported animation assets.
 - `Assets/Scripts/SecondLaw/UI/HudController.cs`: battle HUD and skill command display.
@@ -67,6 +68,7 @@
 - `Assets/Scripts/SecondLaw/Combat/Combatant.cs`: HP/stamina/ammo, damage, guard, stun/charm, death.
 - `Assets/Scripts/SecondLaw/Combat/SpriteSheetAnimator.cs`: runtime 100x100 PNG spritesheet slicing and simple loop/one-shot animation playback.
 - `AGENTS.md`: project north star, verification checklist, and documentation rules.
+- `/Users/aimer/.codex/skills/doc-commit/SKILL.md`: opt-in documentation-and-commit workflow for this project.
 
 ## Current Controls
 
@@ -83,7 +85,7 @@
 
 - Real Unity WebGL build/canvas is not connected to `web/` yet; the first Web pass uses a mock battle screen.
 - Battle HUD is still generated by Canvas code; Unity fallback guild side uses UI Toolkit while the Web prototype uses React.
-- Shop/equipment still opens a placeholder page; counter, notice board, and party table now have real Web transition videos, with counter and party table using looping video backdrops after entry.
+- Shop/equipment still opens a placeholder page; counter, notice board, and party table now have real Web transition videos and looping video backdrops after entry.
 - The imported Boar animation assets are not wired into the battle yet; current enemy visuals still use the existing Orc placeholder.
 - Hotspot visuals are now PNG-mask based and clickable, but the exact mask art may still need hands-on cleanup in Photoshop if edges feel too broad or too narrow.
 - No real animation, audio, title logo, save file UI, or AI API provider yet.

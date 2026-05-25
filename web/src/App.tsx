@@ -28,6 +28,7 @@ interface TransitionState {
   pinnedLoops?: boolean;
   pinnedMuted?: boolean;
   pinnedAudioFadeOutSeconds?: number;
+  transitionAudioFadeOutSeconds?: number;
 }
 
 function readLanguage(): Language {
@@ -167,7 +168,8 @@ export default function App() {
         pinnedVideoSrc: guildAssets.counterLoopVideo,
         pinnedLoops: true,
         pinnedMuted: false,
-        pinnedAudioFadeOutSeconds: 2
+        pinnedAudioFadeOutSeconds: 2,
+        transitionAudioFadeOutSeconds: 2
       };
     }
 
@@ -175,7 +177,12 @@ export default function App() {
       return {
         target: "board",
         phase: "playing",
-        videoSrc: guildAssets.boardVideo
+        videoSrc: guildAssets.boardVideo,
+        pinnedVideoSrc: guildAssets.boardLoopVideo,
+        pinnedLoops: true,
+        pinnedMuted: false,
+        pinnedAudioFadeOutSeconds: 2,
+        transitionAudioFadeOutSeconds: 2
       };
     }
 
@@ -309,15 +316,14 @@ export default function App() {
       {transitionState ? (
         <TransitionOverlay
           key={transitionState.target}
-          src={
-            transitionState.phase === "pinned" && transitionState.pinnedVideoSrc
-              ? transitionState.pinnedVideoSrc
-              : transitionState.videoSrc
-          }
+          src={transitionState.videoSrc}
           pinned={transitionState.phase === "pinned"}
-          loop={transitionState.phase === "pinned" && Boolean(transitionState.pinnedLoops)}
-          muted={transitionState.phase === "pinned" ? transitionState.pinnedMuted : false}
-          audioFadeOutSeconds={transitionState.phase === "pinned" ? transitionState.pinnedAudioFadeOutSeconds : undefined}
+          postrollSrc={transitionState.pinnedVideoSrc}
+          postrollLoop={Boolean(transitionState.pinnedLoops)}
+          postrollMuted={transitionState.pinnedMuted}
+          postrollAudioFadeOutSeconds={transitionState.pinnedAudioFadeOutSeconds}
+          startWithPostroll={transitionState.phase === "pinned"}
+          audioFadeOutSeconds={transitionState.transitionAudioFadeOutSeconds}
           playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>
