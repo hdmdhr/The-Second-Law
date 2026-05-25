@@ -26,6 +26,8 @@ interface TransitionState {
   videoSrc: string;
   pinnedVideoSrc?: string;
   pinnedLoops?: boolean;
+  pinnedMuted?: boolean;
+  pinnedAudioFadeOutSeconds?: number;
 }
 
 function readLanguage(): Language {
@@ -161,7 +163,11 @@ export default function App() {
       return {
         target: "counter",
         phase: "playing",
-        videoSrc: guildAssets.counterVideo
+        videoSrc: guildAssets.counterVideo,
+        pinnedVideoSrc: guildAssets.counterLoopVideo,
+        pinnedLoops: true,
+        pinnedMuted: false,
+        pinnedAudioFadeOutSeconds: 2
       };
     }
 
@@ -179,7 +185,8 @@ export default function App() {
         phase: "playing",
         videoSrc: guildAssets.tableVideo,
         pinnedVideoSrc: guildAssets.tableLoopVideo,
-        pinnedLoops: true
+        pinnedLoops: true,
+        pinnedMuted: true
       };
     }
 
@@ -309,6 +316,8 @@ export default function App() {
           }
           pinned={transitionState.phase === "pinned"}
           loop={transitionState.phase === "pinned" && Boolean(transitionState.pinnedLoops)}
+          muted={transitionState.phase === "pinned" ? transitionState.pinnedMuted : false}
+          audioFadeOutSeconds={transitionState.phase === "pinned" ? transitionState.pinnedAudioFadeOutSeconds : undefined}
           playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>

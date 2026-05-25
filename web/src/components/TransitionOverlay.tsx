@@ -5,11 +5,21 @@ interface TransitionOverlayProps {
   src: string;
   pinned: boolean;
   loop?: boolean;
+  muted?: boolean;
+  audioFadeOutSeconds?: number;
   playbackRate?: number;
   onDone: () => void;
 }
 
-export default function TransitionOverlay({ src, pinned, loop = false, playbackRate = 1, onDone }: TransitionOverlayProps) {
+export default function TransitionOverlay({
+  src,
+  pinned,
+  loop = false,
+  muted = false,
+  audioFadeOutSeconds,
+  playbackRate = 1,
+  onDone
+}: TransitionOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const finishedRef = useRef(false);
   const [ready, setReady] = useState(false);
@@ -37,8 +47,10 @@ export default function TransitionOverlay({ src, pinned, loop = false, playbackR
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.playbackRate = playbackRate;
+      videoRef.current.muted = muted;
+      videoRef.current.volume = 1;
     }
-  }, [playbackRate, src]);
+  }, [muted, playbackRate, src]);
 
   function finish() {
     if (finishedRef.current) {
@@ -56,15 +68,33 @@ export default function TransitionOverlay({ src, pinned, loop = false, playbackR
     }
 
     video.currentTime = 0;
+    video.volume = 1;
     void video.play().catch((error) => {
-      console.warn("[SecondLaw] Table loop playback was blocked.", error);
+      console.warn("[SecondLaw] Loop playback was blocked.", error);
     });
+  }
+
+  function updateLoopAudioFade() {
+    const video = videoRef.current;
+    if (!video || muted || !loop || !audioFadeOutSeconds || !Number.isFinite(video.duration) || video.duration <= 0) {
+      return;
+    }
+
+    const remaining = video.duration - video.currentTime;
+    if (remaining <= audioFadeOutSeconds) {
+      video.volume = Math.max(0, remaining / audioFadeOutSeconds);
+      return;
+    }
+
+    video.volume = 1;
   }
 
   function startWhenReady() {
     setReady(true);
     if (videoRef.current) {
       videoRef.current.playbackRate = playbackRate;
+      videoRef.current.muted = muted;
+      videoRef.current.volume = 1;
     }
 
     if (pinned && !loop) {
@@ -85,10 +115,11 @@ export default function TransitionOverlay({ src, pinned, loop = false, playbackR
         autoPlay
         playsInline
         loop={false}
-        muted={loop}
+        muted={muted}
         preload="auto"
         onCanPlay={startWhenReady}
         onEnded={loop ? restartLoop : finish}
+        onTimeUpdate={updateLoopAudioFade}
       />
     </div>
   );
