@@ -17,7 +17,7 @@ const TransitionSpeedKey = "SecondLaw.Web.TransitionSpeed";
 const ProgressionKey = "SecondLaw.Web.Progression";
 const transitionSpeeds = [1, 2, 3, 4] as const;
 type TransitionSpeed = (typeof transitionSpeeds)[number];
-type TransitionTarget = Extract<GuildView, "counter" | "board" | "party">;
+type TransitionTarget = Extract<GuildView, "counter" | "board" | "party" | "shop">;
 type TransitionPhase = "playing" | "pinned";
 
 interface TransitionState {
@@ -29,6 +29,12 @@ interface TransitionState {
   pinnedMuted?: boolean;
   pinnedAudioFadeOutSeconds?: number;
   transitionAudioFadeOutSeconds?: number;
+  backgroundAudioSrc?: string;
+  backgroundAudioLoop?: boolean;
+  backgroundAudioStartProgress?: number;
+  backgroundAudioStartOffsetSeconds?: number;
+  backgroundAudioStartSeconds?: number;
+  backgroundAudioVolume?: number;
 }
 
 function readLanguage(): Language {
@@ -169,7 +175,10 @@ export default function App() {
         pinnedLoops: true,
         pinnedMuted: false,
         pinnedAudioFadeOutSeconds: 2,
-        transitionAudioFadeOutSeconds: 2
+        transitionAudioFadeOutSeconds: 2,
+        backgroundAudioSrc: guildAssets.counterThemeMusic,
+        backgroundAudioLoop: true,
+        backgroundAudioStartSeconds: 5
       };
     }
 
@@ -193,7 +202,21 @@ export default function App() {
         videoSrc: guildAssets.tableVideo,
         pinnedVideoSrc: guildAssets.tableLoopVideo,
         pinnedLoops: true,
-        pinnedMuted: true
+        pinnedMuted: true,
+        backgroundAudioSrc: guildAssets.tableThemeMusic,
+        backgroundAudioLoop: true,
+        backgroundAudioStartProgress: 0.5
+      };
+    }
+
+    if (hotspot === "shop") {
+      return {
+        target: "shop",
+        phase: "playing",
+        videoSrc: guildAssets.shopVideo,
+        backgroundAudioSrc: guildAssets.shopThemeMusic,
+        backgroundAudioLoop: true,
+        backgroundAudioStartProgress: 0.5
       };
     }
 
@@ -324,6 +347,12 @@ export default function App() {
           postrollAudioFadeOutSeconds={transitionState.pinnedAudioFadeOutSeconds}
           startWithPostroll={transitionState.phase === "pinned"}
           audioFadeOutSeconds={transitionState.transitionAudioFadeOutSeconds}
+          backgroundAudioSrc={transitionState.backgroundAudioSrc}
+          backgroundAudioLoop={transitionState.backgroundAudioLoop}
+          backgroundAudioStartProgress={transitionState.backgroundAudioStartProgress}
+          backgroundAudioStartOffsetSeconds={transitionState.backgroundAudioStartOffsetSeconds}
+          backgroundAudioStartSeconds={transitionState.backgroundAudioStartSeconds}
+          backgroundAudioVolume={transitionState.backgroundAudioVolume}
           playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>

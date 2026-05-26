@@ -11,7 +11,11 @@ export const guildAssets = {
   boardVideo: publicAsset("/assets/guild/video/lobby-to-bulletin.mp4"),
   boardLoopVideo: publicAsset("/assets/guild/video/bulletin-loop.mp4"),
   tableVideo: publicAsset("/assets/guild/video/lobby-to-table.mp4"),
-  tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4")
+  tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4"),
+  shopVideo: publicAsset("/assets/guild/video/lobby-to-shop.mp4"),
+  shopThemeMusic: publicAsset("/assets/guild/audio/shop-theme.mp3"),
+  counterThemeMusic: publicAsset("/assets/guild/audio/counter-theme.mp3"),
+  tableThemeMusic: publicAsset("/assets/guild/audio/table-theme.mp3")
 } as const;
 
 export const hotspots: HotspotDefinition[] = [
