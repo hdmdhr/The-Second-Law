@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useGuildAudio } from "./audio/useGuildAudio";
+import type { BackgroundAudioCue } from "./audio/types";
 import { createUnityBridge } from "./bridge/unityBridge";
 import CounterPage from "./components/CounterPage";
 import GuildHub from "./components/GuildHub";
@@ -15,6 +17,7 @@ const LanguageKey = "SecondLaw.Web.Language";
 const SkipTransitionKey = "SecondLaw.Web.SkipGuildTransitions";
 const TransitionSpeedKey = "SecondLaw.Web.TransitionSpeed";
 const ProgressionKey = "SecondLaw.Web.Progression";
+const HubReleaseFadeSeconds = 3;
 const transitionSpeeds = [1, 2, 3, 4] as const;
 type TransitionSpeed = (typeof transitionSpeeds)[number];
 type TransitionTarget = Extract<GuildView, "counter" | "board" | "party" | "shop">;
@@ -29,13 +32,7 @@ interface TransitionState {
   pinnedMuted?: boolean;
   pinnedAudioFadeOutSeconds?: number;
   transitionAudioFadeOutSeconds?: number;
-  backgroundAudioSrc?: string;
-  backgroundAudioLoop?: boolean;
-  backgroundAudioStartProgress?: number;
-  backgroundAudioStartOffsetSeconds?: number;
-  backgroundAudioStartSeconds?: number;
-  backgroundAudioVolume?: number;
-  backgroundAudioFadeInSeconds?: number;
+  backgroundAudio?: BackgroundAudioCue;
 }
 
 function readLanguage(): Language {
@@ -74,12 +71,12 @@ function saveProgression(state: ProgressionState) {
 }
 
 export default function App() {
+  const { armBackgroundAudio, syncWithVideoProgress, releaseBackgroundAudio } = useGuildAudio();
   const [language, setLanguage] = useState<Language>(readLanguage);
   const [view, setView] = useState<GuildView>("hub");
   const [skipTransitions, setSkipTransitions] = useState(() => readBoolean(SkipTransitionKey));
   const [transitionSpeed, setTransitionSpeed] = useState<TransitionSpeed>(readTransitionSpeed);
   const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
-  const backgroundAudioPrimingRef = useRef<HTMLAudioElement | null>(null);
   const [progression, setProgression] = useState<ProgressionState>(readProgression);
   const [rewardMessages, setRewardMessages] = useState<string[]>([]);
   const [replyMessage, setReplyMessage] = useState("");
@@ -91,6 +88,8 @@ export default function App() {
 
   const handleBattleFinished = useCallback(
     (result: BattleResult) => {
+      releaseBackgroundAudio(HubReleaseFadeSeconds);
+
       if (!result.victory) {
         setRewardMessages([translate("battle.retreat")]);
         setTransitionState(null);
@@ -129,7 +128,7 @@ export default function App() {
       setTransitionState(null);
       setView("counter");
     },
-    [translate]
+    [releaseBackgroundAudio, translate]
   );
 
   const bridge = useMemo(() => createUnityBridge(handleBattleFinished), [handleBattleFinished]);
@@ -156,32 +155,20 @@ export default function App() {
     });
   }
 
-  function primeBackgroundAudio(src?: string) {
-    if (!src) {
-      return;
-    }
-
-    const audio = backgroundAudioPrimingRef.current ?? new Audio();
-    backgroundAudioPrimingRef.current = audio;
-    audio.src = src;
-
-    audio.volume = 0;
-    void audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-    }).catch(() => {
-      // Autoplay may still be blocked; TransitionOverlay will retry later.
-    });
-  }
-
   function openHotspot(hotspot: HotspotId) {
     const transition = transitionForHotspot(hotspot);
     if (transition) {
-      primeBackgroundAudio(transition.backgroundAudioSrc);
+      if (transition.backgroundAudio) {
+        void armBackgroundAudio(transition.backgroundAudio);
+      } else {
+        releaseBackgroundAudio(HubReleaseFadeSeconds);
+      }
+
       openWithTransition(transition);
       return;
     }
 
+    releaseBackgroundAudio(HubReleaseFadeSeconds);
     setTransitionState(null);
     setView(hotspot);
   }
@@ -197,9 +184,11 @@ export default function App() {
         pinnedMuted: false,
         pinnedAudioFadeOutSeconds: 2,
         transitionAudioFadeOutSeconds: 2,
-        backgroundAudioSrc: guildAssets.counterThemeMusic,
-        backgroundAudioLoop: true,
-        backgroundAudioStartSeconds: 5
+        backgroundAudio: {
+          src: guildAssets.counterThemeMusic,
+          loop: true,
+          startSeconds: 5
+        }
       };
     }
 
@@ -213,11 +202,13 @@ export default function App() {
         pinnedMuted: false,
         pinnedAudioFadeOutSeconds: 2,
         transitionAudioFadeOutSeconds: 2,
-        backgroundAudioSrc: guildAssets.boardThemeMusic,
-        backgroundAudioLoop: true,
-        backgroundAudioStartProgress: 1,
-        backgroundAudioStartOffsetSeconds: -1,
-        backgroundAudioFadeInSeconds: 1.5
+        backgroundAudio: {
+          src: guildAssets.boardThemeMusic,
+          loop: true,
+          startProgress: 1,
+          startOffsetSeconds: -2,
+          fadeInSeconds: 2
+        }
       };
     }
 
@@ -229,9 +220,11 @@ export default function App() {
         pinnedVideoSrc: guildAssets.tableLoopVideo,
         pinnedLoops: true,
         pinnedMuted: true,
-        backgroundAudioSrc: guildAssets.tableThemeMusic,
-        backgroundAudioLoop: true,
-        backgroundAudioStartProgress: 0.5
+        backgroundAudio: {
+          src: guildAssets.tableThemeMusic,
+          loop: true,
+          startProgress: 0.5
+        }
       };
     }
 
@@ -240,9 +233,11 @@ export default function App() {
         target: "shop",
         phase: "playing",
         videoSrc: guildAssets.shopVideo,
-        backgroundAudioSrc: guildAssets.shopThemeMusic,
-        backgroundAudioLoop: true,
-        backgroundAudioStartProgress: 0.5
+        backgroundAudio: {
+          src: guildAssets.shopThemeMusic,
+          loop: true,
+          startProgress: 0.5
+        }
       };
     }
 
@@ -260,6 +255,16 @@ export default function App() {
           : null
       );
       setView(next.target);
+
+      if (next.backgroundAudio) {
+        syncWithVideoProgress({
+          currentTime: Number.MAX_SAFE_INTEGER,
+          duration: Number.MAX_SAFE_INTEGER,
+          pinned: true,
+          skipTransition: true
+        });
+      }
+
       return;
     }
 
@@ -267,12 +272,14 @@ export default function App() {
   }
 
   function startQuest() {
+    releaseBackgroundAudio(HubReleaseFadeSeconds);
     bridge.startQuest(firstQuest.questId);
     setTransitionState(null);
     setView("battleMock");
   }
 
   function showHub() {
+    releaseBackgroundAudio(HubReleaseFadeSeconds);
     setTransitionState(null);
     setView("hub");
   }
@@ -373,13 +380,6 @@ export default function App() {
           postrollAudioFadeOutSeconds={transitionState.pinnedAudioFadeOutSeconds}
           startWithPostroll={transitionState.phase === "pinned"}
           audioFadeOutSeconds={transitionState.transitionAudioFadeOutSeconds}
-          backgroundAudioSrc={transitionState.backgroundAudioSrc}
-          backgroundAudioLoop={transitionState.backgroundAudioLoop}
-          backgroundAudioStartProgress={transitionState.backgroundAudioStartProgress}
-          backgroundAudioStartOffsetSeconds={transitionState.backgroundAudioStartOffsetSeconds}
-          backgroundAudioStartSeconds={transitionState.backgroundAudioStartSeconds}
-          backgroundAudioVolume={transitionState.backgroundAudioVolume}
-          backgroundAudioFadeInSeconds={transitionState.backgroundAudioFadeInSeconds}
           playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>
