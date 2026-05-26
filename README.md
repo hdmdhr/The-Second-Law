@@ -21,6 +21,7 @@ Use Node `20.19+` for the Web project. The repo includes `web/.nvmrc`; in Codex,
 - guild hall background and alpha-tested PNG hotspot masks
 - counter, request-board, table, and gear-shop transition videos; counter/request-board/table use looping backdrops and smooth video handoff
 - independent looping BGM for counter, request-board, table, and gear-shop transitions/pages
+- first-pass RPGUI styling for Web panels, buttons, and cursors
 - counter page with quest, reward, progression, client letter, and reply choices
 - placeholder pages for the request board, party finder, and gear shop
 - mock Unity bridge flow: accept request -> mock battle -> victory/retreat -> return to guild

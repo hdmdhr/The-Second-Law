@@ -87,7 +87,7 @@
   min-height: 42px;
   border: 1px solid rgb(255 218 150 / 0.34);
   color: #fff3d8;
-  background: rgb(18 21 28 / 0.76);
+  background-color: rgb(18 21 28 / 0.76);
   box-shadow: 0 10px 28px rgb(0 0 0 / 0.28);
 }
 
@@ -106,7 +106,7 @@
 .backButton:hover,
 .secondaryButton:hover,
 .replyChoice:hover {
-  background: rgb(61 72 88 / 0.82);
+  background-color: rgb(61 72 88 / 0.82);
 }
 
 .togglePill {
@@ -241,8 +241,8 @@
   width: min(1160px, calc(100vw - 64px));
   margin: 0 auto;
   border: 1px solid rgb(246 205 139 / 0.22);
-  border-radius: 8px;
-  background: rgb(20 23 29 / 0.58);
+  border-radius: 0;
+  background-color: rgb(20 23 29 / 0.58);
   box-shadow: 0 28px 80px rgb(0 0 0 / 0.34);
   backdrop-filter: blur(10px);
 }
@@ -289,9 +289,9 @@
 .panel {
   min-width: 0;
   border: 1px solid rgb(255 231 178 / 0.14);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 18px;
-  background: rgb(11 14 20 / 0.36);
+  background-color: rgb(11 14 20 / 0.36);
 }
 
 .panel h2,
@@ -344,16 +344,16 @@
 .primaryButton {
   border-color: rgb(255 199 92 / 0.62);
   color: #25190c;
-  background: #ffc45d;
+  background-color: #ffc45d;
   font-weight: 700;
 }
 
 .primaryButton:hover {
-  background: #ffd27a;
+  background-color: #ffd27a;
 }
 
 .secondaryButton {
-  background: rgb(37 48 59 / 0.74);
+  background-color: rgb(37 48 59 / 0.74);
 }
 
 .rewardList {
@@ -401,7 +401,7 @@
 
 .replyChoiceSelected {
   border-color: rgb(130 220 176 / 0.8);
-  background: rgb(44 91 74 / 0.72);
+  background-color: rgb(44 91 74 / 0.72);
 }
 
 .placeholderPanel,
@@ -446,17 +446,17 @@
 .partyOption {
   min-height: 148px;
   border: 1px solid rgb(255 218 150 / 0.32);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 16px;
   color: #fff2d5;
-  background: rgb(14 17 22 / 0.42);
+  background-color: rgb(14 17 22 / 0.42);
   text-align: left;
   cursor: pointer;
 }
 
 .partyOption:hover {
   border-color: rgb(255 196 94 / 0.78);
-  background: rgb(47 39 30 / 0.58);
+  background-color: rgb(47 39 30 / 0.58);
 }
 
 .partyOption strong,
@@ -516,6 +516,36 @@
   bottom: 46px;
   background: #84c69b;
   color: #102316;
+}
+
+.app :global(.rpgui-container.framed-golden-2),
+.app :global(.rpgui-container.framed-grey) {
+  background-color: rgb(17 19 24 / 0.54);
+  background-blend-mode: multiply;
+}
+
+.app :global(.rpgui-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app .toolButton:global(.rpgui-button),
+.app .backButton:global(.rpgui-button),
+.app .secondaryButton:global(.rpgui-button),
+.app .replyChoice:global(.rpgui-button) {
+  padding: 10px 22px;
+}
+
+.app .primaryButton:global(.rpgui-button.golden) {
+  min-width: 170px;
+  padding: 13px 26px;
+}
+
+.app .replyChoice:global(.rpgui-button) {
+  justify-content: flex-start;
+  min-height: 54px;
+  text-align: left;
 }
 
 @media (max-width: 820px) {

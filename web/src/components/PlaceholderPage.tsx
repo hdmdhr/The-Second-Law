@@ -35,23 +35,30 @@ export default function PlaceholderPage({ view, translate, useVideoBackdrop = fa
       ].join(" ")}
     >
       {useVideoBackdrop ? null : <div className={styles.pageBackdrop} />}
-      <section className={[styles.placeholderPanel, view === "party" ? styles.partyPanel : ""].join(" ")}>
-        <button className={styles.backButton} type="button" onClick={onBack}>
+      <section
+        className={[
+          styles.placeholderPanel,
+          view === "party" ? styles.partyPanel : "",
+          "rpgui-container",
+          "framed-golden-2"
+        ].join(" ")}
+      >
+        <button className={[styles.backButton, "rpgui-button"].join(" ")} type="button" onClick={onBack}>
           {translate("guild.back")}
         </button>
         <h1>{translate(keys.title)}</h1>
         <p>{translate(keys.body)}</p>
         {view === "party" ? (
           <div className={styles.partyOptions}>
-            <button className={styles.partyOption} type="button">
+            <button className={[styles.partyOption, "rpgui-container", "framed-grey"].join(" ")} type="button">
               <strong>{translate("guild.party.option.local")}</strong>
               <span>{translate("guild.party.option.local.body")}</span>
             </button>
-            <button className={styles.partyOption} type="button">
+            <button className={[styles.partyOption, "rpgui-container", "framed-grey"].join(" ")} type="button">
               <strong>{translate("guild.party.option.online")}</strong>
               <span>{translate("guild.party.option.online.body")}</span>
             </button>
-            <button className={styles.partyOption} type="button">
+            <button className={[styles.partyOption, "rpgui-container", "framed-grey"].join(" ")} type="button">
               <strong>{translate("guild.party.option.invite")}</strong>
               <span>{translate("guild.party.option.invite.body")}</span>
             </button>

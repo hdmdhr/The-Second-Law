@@ -19,14 +19,14 @@ export default function TopBar({
 }: TopBarProps) {
   return (
     <div className={styles.topBar}>
-      <button className={styles.toolButton} type="button" onClick={onToggleLanguage}>
+      <button className={[styles.toolButton, "rpgui-button"].join(" ")} type="button" onClick={onToggleLanguage}>
         {translate("language.button")}
       </button>
       <label className={styles.togglePill}>
         <input type="checkbox" checked={skipTransitions} onChange={onToggleSkipTransitions} />
         <span>{translate("guild.skip_transition")}</span>
       </label>
-      <button className={styles.toolButton} type="button" onClick={onCycleTransitionSpeed}>
+      <button className={[styles.toolButton, "rpgui-button"].join(" ")} type="button" onClick={onCycleTransitionSpeed}>
         {transitionSpeedLabel}
       </button>
     </div>

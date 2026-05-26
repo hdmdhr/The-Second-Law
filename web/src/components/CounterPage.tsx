@@ -42,9 +42,9 @@ export default function CounterPage({
   return (
     <main className={[styles.pageShell, useVideoBackdrop ? styles.pageShellOverVideo : ""].join(" ")}>
       {useVideoBackdrop ? null : <div className={styles.pageBackdrop} />}
-      <section className={styles.pagePanelWide}>
+      <section className={[styles.pagePanelWide, "rpgui-container", "framed-golden-2"].join(" ")}>
         <header className={styles.pageHeader}>
-          <button className={styles.backButton} type="button" onClick={onBack}>
+          <button className={[styles.backButton, "rpgui-button"].join(" ")} type="button" onClick={onBack}>
             {translate("guild.back")}
           </button>
           <div>
@@ -54,7 +54,7 @@ export default function CounterPage({
         </header>
 
         <div className={styles.counterGrid}>
-          <article className={styles.panel}>
+          <article className={[styles.panel, "rpgui-container", "framed-grey"].join(" ")}>
             <h2>{translate(firstQuest.titleKey)}</h2>
             <p>{translate(firstQuest.descriptionKey)}</p>
             <dl className={styles.questFacts}>
@@ -73,16 +73,16 @@ export default function CounterPage({
               </div>
             </dl>
             <div className={styles.buttonRow}>
-              <button className={styles.primaryButton} type="button" onClick={onStartQuest}>
+              <button className={[styles.primaryButton, "rpgui-button", "golden"].join(" ")} type="button" onClick={onStartQuest}>
                 {translate("button.accept")}
               </button>
-              <button className={styles.secondaryButton} type="button" onClick={onReset}>
+              <button className={[styles.secondaryButton, "rpgui-button"].join(" ")} type="button" onClick={onReset}>
                 {translate("button.reset")}
               </button>
             </div>
           </article>
 
-          <article className={styles.panel}>
+          <article className={[styles.panel, "rpgui-container", "framed-grey"].join(" ")}>
             <h2>{translate("guild.counter.status")}</h2>
             <dl className={styles.statusList}>
               <div>
@@ -115,7 +115,7 @@ export default function CounterPage({
             ) : null}
           </article>
 
-          <article className={[styles.panel, styles.letterPanel].join(" ")}>
+          <article className={[styles.panel, styles.letterPanel, "rpgui-container", "framed-grey"].join(" ")}>
             <h2>{translate("guild.counter.letter")}</h2>
             <div className={styles.letterText}>
               {hasLetter ? (
@@ -147,7 +147,7 @@ export default function CounterPage({
                   selected={selectedClosing}
                   onPick={onPickClosing}
                 />
-                <button className={styles.primaryButton} type="button" onClick={onSendReply}>
+                <button className={[styles.primaryButton, "rpgui-button", "golden"].join(" ")} type="button" onClick={onSendReply}>
                   {translate("reply.send")}
                 </button>
               </div>
@@ -173,7 +173,7 @@ function ReplyColumn({ title, values, selected, onPick }: ReplyColumnProps) {
       {values.map((value) => (
         <button
           key={value}
-          className={[styles.replyChoice, selected === value ? styles.replyChoiceSelected : ""].join(" ")}
+          className={[styles.replyChoice, "rpgui-button", selected === value ? styles.replyChoiceSelected : ""].join(" ")}
           type="button"
           onClick={() => onPick(value)}
         >
