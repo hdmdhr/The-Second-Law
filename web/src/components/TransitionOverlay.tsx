@@ -27,6 +27,7 @@ interface TransitionOverlayProps {
   backgroundAudioStartOffsetSeconds?: number;
   backgroundAudioStartSeconds?: number;
   backgroundAudioVolume?: number;
+  backgroundAudioFadeInSeconds?: number;
   videoAudioGain?: number;
   playbackRate?: number;
   onDone: () => void;
@@ -47,6 +48,7 @@ export default function TransitionOverlay({
   backgroundAudioStartOffsetSeconds = 0,
   backgroundAudioStartSeconds,
   backgroundAudioVolume = 0.7,
+  backgroundAudioFadeInSeconds = 0,
   videoAudioGain = 1.3,
   playbackRate = 1,
   onDone
@@ -58,6 +60,8 @@ export default function TransitionOverlay({
   const postrollPendingRef = useRef(false);
   const postrollStartedRef = useRef(false);
   const backgroundAudioStartedRef = useRef(false);
+  const backgroundAudioFadeFrameRef = useRef<number | null>(null);
+  const backgroundAudioScheduleRef = useRef<number | null>(null);
   const [primaryReady, setPrimaryReady] = useState(false);
   const [postrollReady, setPostrollReady] = useState(false);
   const [postrollActive, setPostrollActive] = useState(false);
@@ -82,6 +86,8 @@ export default function TransitionOverlay({
     setPrimaryReady(false);
     setPostrollReady(false);
     setPostrollActive(false);
+    cancelBackgroundAudioFade();
+    clearBackgroundAudioSchedule();
     postrollPendingRef.current = false;
     postrollStartedRef.current = false;
     backgroundAudioStartedRef.current = false;
@@ -89,8 +95,18 @@ export default function TransitionOverlay({
   }, [backgroundAudioSrc, postrollSrc, src]);
 
   useEffect(() => {
+    return () => {
+      clearBackgroundAudioSchedule();
+    };
+  }, []);
+
+  useEffect(() => {
     const audio = backgroundAudioRef.current;
     if (!audio) {
+      return;
+    }
+
+    if (backgroundAudioFadeFrameRef.current !== null) {
       return;
     }
 
@@ -98,12 +114,12 @@ export default function TransitionOverlay({
   }, [backgroundAudioVolume, backgroundAudioSrc]);
 
   useEffect(() => {
-    if (!pinned || !backgroundAudioSrc) {
+    if (!backgroundAudioSrc || backgroundAudioStartedRef.current) {
       return;
     }
 
-    startBackgroundAudio();
-  }, [backgroundAudioSrc, pinned]);
+    scheduleBackgroundAudio();
+  }, [backgroundAudioSrc, pinned, playbackRate, startWithPostroll]);
 
   useEffect(() => {
     if (!startWithPostroll || !postrollSrc) {
@@ -295,12 +311,31 @@ export default function TransitionOverlay({
     activatePostroll();
   }
 
-  function maybeStartBackgroundAudio() {
+  function clearBackgroundAudioSchedule() {
+    if (backgroundAudioScheduleRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(backgroundAudioScheduleRef.current);
+    backgroundAudioScheduleRef.current = null;
+  }
+
+  function resolveBackgroundAudioStartTime(video: HTMLVideoElement) {
+    return Math.max(
+      0,
+      backgroundAudioStartSeconds ??
+        video.duration * Math.min(1, Math.max(0, backgroundAudioStartProgress)) +
+          backgroundAudioStartOffsetSeconds
+    );
+  }
+
+  function scheduleBackgroundAudio() {
     if (!backgroundAudioSrc || backgroundAudioStartedRef.current) {
       return;
     }
 
     if (pinned || startWithPostroll) {
+      clearBackgroundAudioSchedule();
       startBackgroundAudio();
       return;
     }
@@ -310,12 +345,23 @@ export default function TransitionOverlay({
       return;
     }
 
-    const startTime =
-      backgroundAudioStartSeconds ??
-      video.duration * Math.min(1, Math.max(0, backgroundAudioStartProgress)) + backgroundAudioStartOffsetSeconds;
-    if (video.currentTime >= Math.max(0, startTime)) {
+    const startTime = resolveBackgroundAudioStartTime(video);
+    if (video.currentTime >= startTime) {
+      clearBackgroundAudioSchedule();
       startBackgroundAudio();
+      return;
     }
+
+    clearBackgroundAudioSchedule();
+    const delayMs = ((startTime - video.currentTime) / playbackRate) * 1000;
+    backgroundAudioScheduleRef.current = window.setTimeout(() => {
+      backgroundAudioScheduleRef.current = null;
+      startBackgroundAudio();
+    }, Math.max(0, delayMs));
+  }
+
+  function maybeStartBackgroundAudio() {
+    scheduleBackgroundAudio();
   }
 
   function startBackgroundAudio() {
@@ -325,12 +371,54 @@ export default function TransitionOverlay({
     }
 
     backgroundAudioStartedRef.current = true;
+    clearBackgroundAudioSchedule();
     audio.currentTime = 0;
-    audio.volume = backgroundAudioVolume;
-    void audio.play().catch((error) => {
-      backgroundAudioStartedRef.current = false;
-      console.warn("[SecondLaw] Background music playback was blocked.", error);
-    });
+    if (backgroundAudioFadeInSeconds > 0) {
+      audio.volume = 0;
+    } else {
+      audio.volume = backgroundAudioVolume;
+    }
+
+    void audio
+      .play()
+      .then(() => {
+        if (backgroundAudioFadeInSeconds > 0) {
+          fadeInBackgroundAudio(audio);
+        }
+      })
+      .catch((error) => {
+        cancelBackgroundAudioFade();
+        backgroundAudioStartedRef.current = false;
+        console.warn("[SecondLaw] Background music playback was blocked.", error);
+      });
+  }
+
+  function fadeInBackgroundAudio(audio: HTMLAudioElement) {
+    cancelBackgroundAudioFade();
+    const startedAt = performance.now();
+    const fadeDurationMs = backgroundAudioFadeInSeconds * 1000;
+
+    function update(now: number) {
+      const progress = Math.min(1, (now - startedAt) / fadeDurationMs);
+      audio.volume = backgroundAudioVolume * progress;
+      if (progress < 1) {
+        backgroundAudioFadeFrameRef.current = window.requestAnimationFrame(update);
+        return;
+      }
+
+      backgroundAudioFadeFrameRef.current = null;
+    }
+
+    backgroundAudioFadeFrameRef.current = window.requestAnimationFrame(update);
+  }
+
+  function cancelBackgroundAudioFade() {
+    if (backgroundAudioFadeFrameRef.current === null) {
+      return;
+    }
+
+    window.cancelAnimationFrame(backgroundAudioFadeFrameRef.current);
+    backgroundAudioFadeFrameRef.current = null;
   }
 
   function playVideo(video: HTMLVideoElement, context: string) {
@@ -401,7 +489,13 @@ export default function TransitionOverlay({
         playsInline
         loop={false}
         preload="auto"
-        onCanPlay={startPrimaryWhenReady}
+        onCanPlay={() => {
+          startPrimaryWhenReady();
+          scheduleBackgroundAudio();
+        }}
+        onLoadedMetadata={() => {
+          scheduleBackgroundAudio();
+        }}
         onEnded={() => {
           if (!postrollStartedRef.current) {
             activatePostroll();

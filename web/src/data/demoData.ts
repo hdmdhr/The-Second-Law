@@ -15,7 +15,8 @@ export const guildAssets = {
   shopVideo: publicAsset("/assets/guild/video/lobby-to-shop.mp4"),
   shopThemeMusic: publicAsset("/assets/guild/audio/shop-theme.mp3"),
   counterThemeMusic: publicAsset("/assets/guild/audio/counter-theme.mp3"),
-  tableThemeMusic: publicAsset("/assets/guild/audio/table-theme.mp3")
+  tableThemeMusic: publicAsset("/assets/guild/audio/table-theme.mp3"),
+  boardThemeMusic: publicAsset("/assets/guild/audio/board-theme.mp3")
 } as const;
 
 export const hotspots: HotspotDefinition[] = [

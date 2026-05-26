@@ -20,13 +20,13 @@ Use Node `20.19+` for the Web project. The repo includes `web/.nvmrc`; in Codex,
 
 - guild hall background and alpha-tested PNG hotspot masks
 - counter, request-board, table, and gear-shop transition videos; counter/request-board/table use looping backdrops and smooth video handoff
-- independent looping BGM for counter, table, and gear-shop transitions/pages
+- independent looping BGM for counter, request-board, table, and gear-shop transitions/pages
 - counter page with quest, reward, progression, client letter, and reply choices
 - placeholder pages for the request board, party finder, and gear shop
 - mock Unity bridge flow: accept request -> mock battle -> victory/retreat -> return to guild
 
 The real Unity WebGL canvas is not connected yet. The existing Unity UI Toolkit guild remains as an Editor/Play Mode fallback until the Web shell can enter and return from real Unity combat.
-The Web guild assets in `web/public/assets/guild/` are symlinks to the Unity `Assets/Resources` files, so images and video stay single-source during the prototype.
+The Web guild assets in `web/public/assets/guild/` are symlinks to the Unity `Assets/Resources` files, so images, video, and BGM stay single-source during the prototype.
 
 ## Sharing The Web Prototype
 

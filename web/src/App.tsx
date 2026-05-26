@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { createUnityBridge } from "./bridge/unityBridge";
 import CounterPage from "./components/CounterPage";
 import GuildHub from "./components/GuildHub";
@@ -35,6 +35,7 @@ interface TransitionState {
   backgroundAudioStartOffsetSeconds?: number;
   backgroundAudioStartSeconds?: number;
   backgroundAudioVolume?: number;
+  backgroundAudioFadeInSeconds?: number;
 }
 
 function readLanguage(): Language {
@@ -78,6 +79,7 @@ export default function App() {
   const [skipTransitions, setSkipTransitions] = useState(() => readBoolean(SkipTransitionKey));
   const [transitionSpeed, setTransitionSpeed] = useState<TransitionSpeed>(readTransitionSpeed);
   const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
+  const backgroundAudioPrimingRef = useRef<HTMLAudioElement | null>(null);
   const [progression, setProgression] = useState<ProgressionState>(readProgression);
   const [rewardMessages, setRewardMessages] = useState<string[]>([]);
   const [replyMessage, setReplyMessage] = useState("");
@@ -154,9 +156,28 @@ export default function App() {
     });
   }
 
+  function primeBackgroundAudio(src?: string) {
+    if (!src) {
+      return;
+    }
+
+    const audio = backgroundAudioPrimingRef.current ?? new Audio();
+    backgroundAudioPrimingRef.current = audio;
+    audio.src = src;
+
+    audio.volume = 0;
+    void audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(() => {
+      // Autoplay may still be blocked; TransitionOverlay will retry later.
+    });
+  }
+
   function openHotspot(hotspot: HotspotId) {
     const transition = transitionForHotspot(hotspot);
     if (transition) {
+      primeBackgroundAudio(transition.backgroundAudioSrc);
       openWithTransition(transition);
       return;
     }
@@ -191,7 +212,12 @@ export default function App() {
         pinnedLoops: true,
         pinnedMuted: false,
         pinnedAudioFadeOutSeconds: 2,
-        transitionAudioFadeOutSeconds: 2
+        transitionAudioFadeOutSeconds: 2,
+        backgroundAudioSrc: guildAssets.boardThemeMusic,
+        backgroundAudioLoop: true,
+        backgroundAudioStartProgress: 1,
+        backgroundAudioStartOffsetSeconds: -1,
+        backgroundAudioFadeInSeconds: 1.5
       };
     }
 
@@ -353,6 +379,7 @@ export default function App() {
           backgroundAudioStartOffsetSeconds={transitionState.backgroundAudioStartOffsetSeconds}
           backgroundAudioStartSeconds={transitionState.backgroundAudioStartSeconds}
           backgroundAudioVolume={transitionState.backgroundAudioVolume}
+          backgroundAudioFadeInSeconds={transitionState.backgroundAudioFadeInSeconds}
           playbackRate={transitionState.phase === "playing" ? transitionSpeed : 1}
           onDone={() => {
             setTransitionState((current) =>
