@@ -19,7 +19,7 @@ Open the Vite URL, usually `http://127.0.0.1:5173/`. The Web prototype currently
 Use Node `20.19+` for the Web project. The repo includes `web/.nvmrc`; in Codex, the bundled Node 22 runtime can also run the build.
 
 - guild hall background and alpha-tested PNG hotspot masks
-- counter, request-board, table, and gear-shop transition videos; counter/request-board/table use looping backdrops and smooth video handoff
+- counter, request-board, table, and gear-shop transition videos; all four guild destinations use looping backdrops and smooth video handoff
 - independent looping BGM for counter, request-board, table, and gear-shop transitions/pages
 - first-pass RPGUI styling for Web panels, buttons, and cursors
 - counter page with quest, reward, progression, client letter, and reply choices

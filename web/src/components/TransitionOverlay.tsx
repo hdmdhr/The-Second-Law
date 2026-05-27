@@ -301,7 +301,7 @@ export default function TransitionOverlay({
   }
 
   function randomLoopPlaybackRate() {
-    return 0.7 + Math.random() * 0.6;
+    return 0.8 + Math.random() * 0.4;
   }
 
   function isVideoReady(video: HTMLVideoElement) {

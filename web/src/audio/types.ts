@@ -8,7 +8,7 @@ export interface BackgroundAudioCue {
   startOffsetSeconds?: number;
 }
 
-export const DEFAULT_BACKGROUND_AUDIO_VOLUME = 0.7;
+export const DEFAULT_BACKGROUND_AUDIO_VOLUME = 0.5;
 
 export function resolveCueStartTime(cue: BackgroundAudioCue, videoDuration: number): number {
   if (!Number.isFinite(videoDuration) || videoDuration <= 0) {

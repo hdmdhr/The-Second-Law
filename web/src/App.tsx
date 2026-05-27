@@ -233,10 +233,14 @@ export default function App() {
         target: "shop",
         phase: "playing",
         videoSrc: guildAssets.shopVideo,
+        pinnedVideoSrc: guildAssets.shopLoopVideo,
+        pinnedLoops: true,
+        pinnedMuted: false,
         backgroundAudio: {
           src: guildAssets.shopThemeMusic,
           loop: true,
-          startProgress: 0.5
+          startProgress: 0.5,
+          startOffsetSeconds: 1.5
         }
       };
     }

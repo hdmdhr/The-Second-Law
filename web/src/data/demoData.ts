@@ -13,6 +13,7 @@ export const guildAssets = {
   tableVideo: publicAsset("/assets/guild/video/lobby-to-table.mp4"),
   tableLoopVideo: publicAsset("/assets/guild/video/table-loop.mp4"),
   shopVideo: publicAsset("/assets/guild/video/lobby-to-shop.mp4"),
+  shopLoopVideo: publicAsset("/assets/guild/video/shop-loop.mp4"),
   shopThemeMusic: publicAsset("/assets/guild/audio/shop-theme.mp3"),
   counterThemeMusic: publicAsset("/assets/guild/audio/counter-theme.mp3"),
   tableThemeMusic: publicAsset("/assets/guild/audio/table-theme.mp3"),

@@ -1,5 +1,6 @@
 import {
   BackgroundAudioCue,
+  DEFAULT_BACKGROUND_AUDIO_VOLUME,
   resolveCueStartTime,
   resolveCueVolume
 } from "./types";
@@ -43,14 +44,14 @@ export function syncBackgroundAudioState(
   const { currentTime, duration, pinned, skipTransition } = progress;
 
   if (skipTransition) {
-    const volume = cue.volume ?? 0.7;
+    const volume = cue.volume ?? DEFAULT_BACKGROUND_AUDIO_VOLUME;
     audio.volume = volume;
     return { volume, shouldStartPlayback: true, holdPaused: false };
   }
 
   if (!Number.isFinite(duration) || duration <= 0) {
     if (pinned) {
-      const volume = cue.volume ?? 0.7;
+      const volume = cue.volume ?? DEFAULT_BACKGROUND_AUDIO_VOLUME;
       audio.volume = volume;
       return { volume, shouldStartPlayback: !audibleStarted, holdPaused: false };
     }
